@@ -1,3 +1,5 @@
+# Local binary built during development
+terraform-provider-tozny
 # Local .terraform directories
 **/.terraform/*
 
