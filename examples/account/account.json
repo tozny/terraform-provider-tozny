@@ -1,0 +1,31 @@
+{
+  "account": {
+    "company": "",
+    "name": "Account Client",
+    "plan": "See Billing Service",
+    "public_key": {
+      "curve25519": "gVEKW1Aq9leDx70CmOt_M2KRdyjbhaXlUif0Si9jl2o"
+    },
+    "signing_key": {
+      "ed25519": "LyjfU1NzPDRXdFVHgsQTCIuPcF8-upHae2FT2zrsgrY"
+    }
+  },
+  "account_password": "",
+  "account_username": "",
+  "api_url": "",
+  "profile": {
+    "auth_salt": "rz7zshEJ0xYPZEoIep8wYA",
+    "email": "noche9@local.com",
+    "enc_salt": "oH5e2DnpLzJRIrxVFtW5CQ",
+    "id": "8fcf1d3f-3f93-4fbe-ac23-bc16dc93349d",
+    "name": "levi",
+    "paper_auth_salt": "EMwkziqRzbv-M7qBb30nNA",
+    "paper_enc_salt": "_-2YBtGiANwpUmtvnQX7Yg",
+    "paper_signing_key": {
+      "ed25519": "7_yjRdl9wWeaGydA-yzNA0DVohy2QG4Z455-PnWZ5dA"
+    },
+    "signing_key": {
+      "ed25519": "OYTz2VNu8wCNO-7Z0C0fU7diFHEe6aMf6XOAIw1EDlo"
+    }
+  }
+}

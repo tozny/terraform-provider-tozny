@@ -1,5 +1,7 @@
-# Local binary built during development
+# Local provider binary built during development
 terraform-provider-tozny
+# Credential files generated or used by the running provider
+tozny_client_credentials.json
 # Local .terraform directories
 **/.terraform/*
 

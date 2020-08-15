@@ -6,6 +6,7 @@ default: install
 all: lint install release
 
 lint:
+	go vet ./...
 	go mod tidy
 
 build:
