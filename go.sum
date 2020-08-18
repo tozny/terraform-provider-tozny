@@ -220,10 +220,10 @@ github.com/stretchr/testify v1.4.0 h1:2E4SXV/wtOkTonXsotYi4li6zVWxYlZuYNCXe9XRJy
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
 github.com/stretchr/testify v1.6.1 h1:hDPOHmpOpP40lSULcqw7IrRb/u7w6RpDC9399XyoNd0=
 github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
-github.com/tozny/e3db-clients-go v0.0.89 h1:VoICyKZzwfxDHXa50BH8u8GHraukX6PSD+J4LqPyCWo=
-github.com/tozny/e3db-clients-go v0.0.89/go.mod h1:q1Zu4VqAnV8g2wIQ4RTH8I0hHzth1L/sCdrVWc+BIAc=
-github.com/tozny/e3db-go/v2 v2.2.0 h1:UutoQkQPtAi+WfoFHhk74wZvxqXW5qe+Pd5KhaJLRYI=
-github.com/tozny/e3db-go/v2 v2.2.0/go.mod h1:Sb6BwCfSPWdO5Ts/njVLeU8uhpbdAKwde8Bc63ZJzME=
+github.com/tozny/e3db-clients-go v0.0.90-0.20200818040143-151568d014ef h1:Jsgqnj1MN+pSkLzD+w1cc9q/tNzuUY/pa7YU6bCYUzs=
+github.com/tozny/e3db-clients-go v0.0.90-0.20200818040143-151568d014ef/go.mod h1:q1Zu4VqAnV8g2wIQ4RTH8I0hHzth1L/sCdrVWc+BIAc=
+github.com/tozny/e3db-go/v2 v2.2.1-0.20200818050920-86785d072490 h1:qenDk0dex0NAXbEDMEB0UXwZ9D2T5nd33+EaGTV4KI8=
+github.com/tozny/e3db-go/v2 v2.2.1-0.20200818050920-86785d072490/go.mod h1:H5SPCK+hZpwL66gLlC2J0L1Z7nxVygPXNqjbg+R7biI=
 github.com/tozny/utils-go v0.0.35 h1:gPvhlQ8QCoLBUjIx1COfYy6o4dfSM8Lrh+2FV9Ask+g=
 github.com/tozny/utils-go v0.0.35/go.mod h1:SHi9wnpPEEzAxbwcBhRd+jW32r+gY6S+AcWweuGytRw=
 github.com/ulikunitz/xz v0.5.5/go.mod h1:2bypXElzHzzJZwzH67Y6wb67pO62Rzfn7BSiF4ABRW8=
