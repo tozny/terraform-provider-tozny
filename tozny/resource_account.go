@@ -162,11 +162,6 @@ func resourceAccount() *schema.Resource {
         Default:     "tozny_client_credentials.json",
         ForceNew:    true,
       },
-      "account_client_id": {
-        Description: "The server defined unique identifier for the Account's (Queen) client.",
-        Type:        schema.TypeString,
-        Computed:    true,
-      },
       "profile": {
         Description: "The account creator's profile settings.",
         Type:        schema.TypeList,
@@ -307,48 +302,98 @@ func resourceAccount() *schema.Resource {
     else
       parse config from Terraform
       create account
-      save client & account config to file
+      save client config to file
 */
 func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
   var diags diag.Diagnostics
+
   toznySDK := m.(*e3db.ToznySDKV3)
+
   var createAccountParams accountClient.CreateAccountRequest
+
   accountCredentialsFilepath := d.Get("account_credentials_filepath").(string)
+
   var accountUsername, accountPassword string
+
   apiEndpoint := toznySDK.APIEndpoint
+
+  var sdkV3Config e3db.ToznySDKJSONConfig
+
+  var accountID string
+
   if d.Get("autogenerate_account_credentials").(bool) {
     if accountCredentialsFilepath != "" {
       return diag.FromErr(errors.New("Only one of autogenerate_account_credentials or account_credentials_filepath can be specified"))
     }
+
     accountUsername, accountPassword = toznySDK.AccountUsername, toznySDK.AccountPassword
+
     if accountUsername == "" {
-      return diag.FromErr(errors.New("Must specify account username on provider when auto generating account resource."))
+      return diag.FromErr(errors.New("Must specify account_username with provider config when auto generating account resource."))
     }
+
     if accountPassword == "" {
       accountPassword = uuid.New().String()
     }
+
+    createdAccount, err := toznySDK.Register(ctx, accountUsername, accountUsername, accountPassword)
+
+    if err != nil {
+      return diag.FromErr(err)
+    }
+
+    sdkV3Config = e3db.ToznySDKJSONConfig{
+      ConfigFile: e3db.ConfigFile{
+        Version:     createdAccount.Account.Config.Version,
+        APIBaseURL:  createdAccount.Account.Config.APIURL,
+        APIKeyID:    createdAccount.Account.Config.APIKeyID,
+        APISecret:   createdAccount.Account.Config.APISecret,
+        ClientID:    createdAccount.Account.Config.ClientID,
+        ClientEmail: createdAccount.Account.Config.ClientEmail,
+        PublicKey:   createdAccount.Account.Config.PublicKey,
+        PrivateKey:  createdAccount.Account.Config.PrivateKey,
+      },
+      AccountPassword:   accountPassword,
+      AccountUsername:   accountUsername,
+      PublicSigningKey:  createdAccount.Account.Config.PublicSigningKey,
+      PrivateSigningKey: createdAccount.Account.Config.PrivateSigningKey,
+    }
+
+    accountID = createdAccount.Account.AccountID
+
   } else {
     if accountCredentialsFilepath != "" {
       var accountCredentials AccountCredentialsFile
+
       bytes, err := ioutil.ReadFile(accountCredentialsFilepath)
+
       if err != nil {
         return diag.FromErr(err)
       }
+
       err = json.Unmarshal(bytes, &accountCredentials)
+
       if err != nil {
         return diag.FromErr(err)
       }
+
       createAccountParams = accountClient.CreateAccountRequest{
         Profile: accountCredentials.Profile,
         Account: accountCredentials.Account,
       }
     } else {
       profile := d.Get("profile").([]interface{})[0].(map[string]interface{})
+
       profileSigningKey := profile["signing_key"].([]interface{})[0].(map[string]interface{})
+
       profilePaperSigningKey := profile["paper_signing_key"].([]interface{})[0].(map[string]interface{})
+
       account := d.Get("account").([]interface{})[0].(map[string]interface{})
+
       accountPublicKey := account["public_key"].([]interface{})[0].(map[string]interface{})
+
       accountSigningKey := account["signing_key"].([]interface{})[0].(map[string]interface{})
+
       createAccountParams = accountClient.CreateAccountRequest{
         Profile: accountClient.Profile{
           Name:               profile["name"].(string),
@@ -376,59 +421,49 @@ func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interf
         },
       }
     }
-  }
-  // create account
-  createAccountResponse, err := toznySDK.CreateAccount(ctx, createAccountParams)
-  if err != nil {
-    return diag.FromErr(err)
-  }
-  // parse & set account config
-  d.Set("account_client_id", createAccountResponse.Account.Client.ClientID)
-  // save client config to file
-  sdkV3Config := e3db.ToznySDKJSONConfig{
-    ConfigFile: e3db.ConfigFile{
-      Version:     2,
-      APIBaseURL:  apiEndpoint,
-      APIKeyID:    createAccountResponse.Account.Client.APIKeyID,
-      APISecret:   createAccountResponse.Account.Client.APISecretKey,
-      ClientID:    createAccountResponse.Account.Client.ClientID,
-      ClientEmail: createAccountResponse.Profile.Email,
-      PublicKey:   createAccountResponse.Account.Client.PublicKey.Curve25519,
-      PrivateKey:  "",
-    },
-    AccountPassword:   accountPassword,
-    AccountUsername:   accountUsername,
-    PublicSigningKey:  createAccountResponse.Account.Client.SigningKey.Ed25519,
-    PrivateSigningKey: "",
+
+    // create account
+    createAccountResponse, err := toznySDK.CreateAccount(ctx, createAccountParams)
+
+    if err != nil {
+      return diag.FromErr(err)
+    }
+
+    accountID = createAccountResponse.Profile.AccountID
+
+    // save client config to file
+    sdkV3Config = e3db.ToznySDKJSONConfig{
+      ConfigFile: e3db.ConfigFile{
+        Version:     2,
+        APIBaseURL:  apiEndpoint,
+        APIKeyID:    createAccountResponse.Account.Client.APIKeyID,
+        APISecret:   createAccountResponse.Account.Client.APISecretKey,
+        ClientID:    createAccountResponse.Account.Client.ClientID,
+        ClientEmail: createAccountResponse.Profile.Email,
+        PublicKey:   createAccountResponse.Account.Client.PublicKey.Curve25519,
+        PrivateKey:  "",
+      },
+      AccountPassword:   accountPassword,
+      AccountUsername:   accountUsername,
+      PublicSigningKey:  createAccountResponse.Account.Client.SigningKey.Ed25519,
+      PrivateSigningKey: "",
+    }
   }
   clientCredentialsJSONBytes, err := json.Marshal(sdkV3Config)
+
   if err != nil {
     return diag.FromErr(err)
   }
+
   err = ioutil.WriteFile(d.Get("client_credentials_save_filepath").(string), clientCredentialsJSONBytes, 0644)
+
   if err != nil {
     return diag.FromErr(err)
   }
-  // Only save account config if had to generate some
-  if d.Get("autogenerate_account_credentials").(bool) {
-    accountCredentials := AccountCredentialsFile{
-      Account:         createAccountResponse.Account,
-      Profile:         createAccountResponse.Profile,
-      AccountUsername: accountUsername,
-      AccountPassword: accountPassword,
-      APIEndpoit:      apiEndpoint,
-    }
-    accountCredentialsJSONBytes, err := json.Marshal(accountCredentials)
-    if err != nil {
-      return diag.FromErr(err)
-    }
-    err = ioutil.WriteFile(d.Get("account_credentials_save_filepath").(string), accountCredentialsJSONBytes, 0644)
-    if err != nil {
-      return diag.FromErr(err)
-    }
-  }
+
   // Associate created account with Terraform state and signal success
-  d.SetId(createAccountResponse.Profile.AccountID)
+  d.SetId(accountID)
+
   return diags
 }
 
