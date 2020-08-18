@@ -34,7 +34,7 @@ func Provider() *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("TOZNY_ACCOUNT_PASSWORD", nil),
 			},
 			"tozny_credentials_json_filepath": &schema.Schema{
-				Description: "Filepath to tozny client credentials in JSON format.",
+				Description: "Filepath to Tozny client credentials in JSON format.",
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   true,
