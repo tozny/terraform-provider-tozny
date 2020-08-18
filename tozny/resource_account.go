@@ -5,6 +5,7 @@ import (
   "encoding/json"
   "errors"
   "io/ioutil"
+  "strings"
 
   "github.com/google/uuid"
   "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -140,20 +141,11 @@ func resourceAccount() *schema.Resource {
         ConflictsWith: []string{"account", "profile"},
       },
       "account_credentials_filepath": {
-        Description:   "The filepath where account credentials will be loaded from.",
-        Type:          schema.TypeString,
-        Optional:      true,
-        Default:       "",
-        ForceNew:      true,
-        ConflictsWith: []string{"account_credentials_save_filepath"},
-      },
-      "account_credentials_save_filepath": {
-        Description:   "The filepath where account credentials will be persisted to.",
-        Type:          schema.TypeString,
-        Optional:      true,
-        Default:       "tozny_account_credentials.json",
-        ForceNew:      true,
-        ConflictsWith: []string{"account_credentials_filepath"},
+        Description: "The filepath where account credentials will be loaded from.",
+        Type:        schema.TypeString,
+        Optional:    true,
+        Default:     "",
+        ForceNew:    true,
       },
       "client_credentials_save_filepath": {
         Description: "The filepath where client credentials will be persisted.",
@@ -171,7 +163,7 @@ func resourceAccount() *schema.Resource {
         Elem: &schema.Resource{
           Schema: map[string]*schema.Schema{
             "account_id": {
-              Description: "The unique server defined identifier for the account..",
+              Description: "The unique server defined identifier for the account.",
               Type:        schema.TypeString,
               Computed:    true,
             },
@@ -354,7 +346,7 @@ func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interf
         PrivateKey:  createdAccount.Account.Config.PrivateKey,
       },
       AccountPassword:   accountPassword,
-      AccountUsername:   accountUsername,
+      AccountUsername:   strings.ToLower(accountUsername),
       PublicSigningKey:  createdAccount.Account.Config.PublicSigningKey,
       PrivateSigningKey: createdAccount.Account.Config.PrivateSigningKey,
     }
@@ -444,7 +436,7 @@ func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interf
         PrivateKey:  "",
       },
       AccountPassword:   accountPassword,
-      AccountUsername:   accountUsername,
+      AccountUsername:   strings.ToLower(accountUsername),
       PublicSigningKey:  createAccountResponse.Account.Client.SigningKey.Ed25519,
       PrivateSigningKey: "",
     }

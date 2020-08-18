@@ -17,7 +17,7 @@ func main() {
 	// If debug mode specified run a debug server in the background
 	// https://www.terraform.io/docs/extend/guides/v2-upgrade-guide.html#support-for-debuggable-provider-binaries
 	if debugMode {
-		err := plugin.Debug(context.Background(), "terraform.tozny.com/tozny/tozny",
+		err := plugin.Debug(context.Background(), "tozny/tozny",
 			&plugin.ServeOpts{
 				ProviderFunc: tozny.Provider,
 			})
