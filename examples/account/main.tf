@@ -7,8 +7,8 @@ terraform {
   required_version = ">= 0.13"
   required_providers {
     tozny = {
-      source  = "terraform.tozny.com/tozny/tozny"
-      version = ">=0.0.1"
+      source  = "tozny/tozny"
+      version = "0.0.0"
     }
   }
 }
