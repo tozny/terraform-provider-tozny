@@ -1,5 +1,5 @@
 BINARY=terraform-provider-tozny
-VERSION=0.0.2
+VERSION=0.0.3
 
 default: build
 
@@ -23,11 +23,11 @@ install-mac: build
 	# https://www.terraform.io/docs/configuration/provider-requirements.html#in-house-providers
 	# https://www.terraform.io/upgrade-guides/0-13.html#in-house-providers
 	# https://www.terraform.io/docs/commands/cli-config.html#implied-local-mirror-directories
-	mkdir -p ~/Library/Application\ Support/io.terraform/plugins/terraform.tozny.com/tozny/tozny/${VERSION}/darwin_amd64/
-	mv ${BINARY} ~/Library/Application\ Support/io.terraform/plugins/terraform.tozny.com/tozny/tozny/${VERSION}/darwin_amd64/${BINARY}_v${VERSION}
+	mkdir -p ~/Library/Application\ Support/io.terraform/plugins/registry.terraform.io/tozny/tozny/${VERSION}/darwin_amd64/
+	mv ${BINARY} ~/Library/Application\ Support/io.terraform/plugins/registry.terraform.io/tozny/tozny/${VERSION}/darwin_amd64/${BINARY}_v${VERSION}
 
 clean-mac:
-	rm -rf ~/Library/Application\ Support/io.terraform/plugins/terraform.tozny.com/tozny/tozny/ || true
+	rm -rf ~/Library/Application\ Support/io.terraform/plugins/registry.terraform.io/tozny/tozny/ || true
 
 version:
 	git tag v${VERSION}
