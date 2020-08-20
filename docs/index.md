@@ -21,7 +21,7 @@ provider "tozny" {
 
 ## Argument Reference
 
-* `api_endpoint` - (Optional) Network location for API management and provisioning of Tozny products & services. Defaults to `https://api.e3db.com`
-* `account_username` - (Optional) Tozny account username. Used to derive client credentials where appropriate. Can also be provided via an environment variable named `TOZNY_ACCOUNT_USERNAME`
-* `account_password` - (Optional) Tozny account password. Used to derive client credentials where appropriate. Can also be provided via an environment variable named `TOZNY_ACCOUNT_PASSWORD`
-* `tozny_credentials_json_filepath` - (Optional) Filepath to Tozny client credentials in JSON format. Defaults to `~/.tozny/e3db.json` . Can also be provided via an environment variable named `TOZNY_CLIENT_CREDENTIALS_FILEPATH`
+* `api_endpoint` - (Optional) Network location for API management and provisioning of Tozny products & services. Defaults to `https://api.e3db.com`.
+* `account_username` - (Optional) Tozny account username. Used to derive client credentials where appropriate. Can also be provided via an environment variable named `TOZNY_ACCOUNT_USERNAME`. Only specify one of `account_username` AND `account_password`, or `tozny_credentials_json_filepath`.
+* `account_password` - (Optional) Tozny account password. Used to derive client credentials where appropriate. Can also be provided via an environment variable named `TOZNY_ACCOUNT_PASSWORD`. Only specify one of `account_username` AND `account_password`, or `tozny_credentials_json_filepath`.
+* `tozny_credentials_json_filepath` - (Optional) Filepath to Tozny client credentials in JSON format. Defaults to `~/.tozny/e3db.json` . Can also be provided via an environment variable named `TOZNY_CLIENT_CREDENTIALS_FILEPATH`. Only specify one of `account_username` AND `account_password`, or `tozny_credentials_json_filepath`.

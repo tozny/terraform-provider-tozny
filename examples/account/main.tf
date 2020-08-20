@@ -8,16 +8,16 @@ terraform {
       # for Tozny registry.terraform.io/tozny
       source  = "tozny/tozny"
       # Pin Tozny provider version
-      version = "0.0.1"
+      version = ">=0.0.2"
     }
   }
 }
 
 # Include the Tozny Terraform provider
 provider "tozny" {
-  api_endpoint = "http://platform.local.tozny.com:8000"
+  api_endpoint = "https://dev.e3db.com"
   account_username = "test+${random_string.account_username_salt.result}@tozny.com"
-  # account_password = "readymyenvironment"
+  account_password = "readymyenvironmentplease"
 }
 
 # Generate a random string for use in creating

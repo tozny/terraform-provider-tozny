@@ -17,7 +17,7 @@ terraform {
       # for Tozny registry.terraform.io/tozny
       source  = "tozny/tozny"
       # Pin Tozny provider version
-      version = "0.0.1"
+      version = ">=0.0.2"
     }
   }
 }
@@ -300,7 +300,7 @@ make clean-mac
 
 ### Documentation
 
-When publishing new releases, be sure to add, update, delete and [verify](https://registry.terraform.io/tools/doc-preview) the documentation for the provider.
+When publishing new releases, be sure to add, update, delete and [verify](https://registry.terraform.io/tools/doc-preview) the [documentation for the provider](./docs).
 
 ### Tagging
 

@@ -34,15 +34,17 @@ func Provider() *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("TOZNY_ACCOUNT_PASSWORD", nil),
 			},
 			"tozny_credentials_json_filepath": &schema.Schema{
-				Description: "Filepath to Tozny client credentials in JSON format.",
-				Type:        schema.TypeString,
-				Optional:    true,
-				Sensitive:   true,
-				DefaultFunc: schema.EnvDefaultFunc("TOZNY_CLIENT_CREDENTIALS_FILEPATH", e3db.ProfileInterpolationConfigFilePath),
+				Description:   "Filepath to Tozny client credentials in JSON format.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Sensitive:     true,
+				DefaultFunc:   schema.EnvDefaultFunc("TOZNY_CLIENT_CREDENTIALS_FILEPATH", ""),
+				ConflictsWith: []string{"account_username", "account_password"},
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"tozny_account": resourceAccount(),
+			"tozny_realm":   resourceRealm(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
@@ -51,29 +53,80 @@ func Provider() *schema.Provider {
 // providerConfigure configures the Tozny provider for use in provisioning Tozny
 // resources (accounts, clients, realms, identities, applications, groups, roles, etc...)
 // initializing the ToznySDK with (in priority order) :
-// 1.) Account credentials (username & password) set on the provider that are used to derive key material
+// 1.) Tozny client credentials from a user specified config file
+// 2.) Account credentials (username & password) set on the provider that are used to derive key material
 // for making account level requests and fetching the account queen client for other API service calls.
-// 2.) Tozny client credentials from a user specified config file
-// 3.) Tozny client credentials from the standard Tozny config directory ~/.tozny
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	// Parse Tozny API endpoint and account and/or client credentials
+
 	apiEndpoint := d.Get("api_endpoint").(string)
 	username := d.Get("account_username").(string)
 	password := d.Get("account_password").(string)
-	// By default try to derive account (queen) client & credentials
-	// for interacting with Tozny API services
-	toznySDK, err := e3db.NewToznySDKV3(e3db.ToznySDKConfig{
-		ClientConfig: e3dbClients.ClientConfig{
-			Host:      apiEndpoint,
-			AuthNHost: apiEndpoint,
-		},
-		AccountUsername: username,
-		AccountPassword: password,
-		APIEndpoint:     apiEndpoint,
-	})
+	clientCredentialsFilepath := d.Get("tozny_credentials_json_filepath").(string)
+
+	var sdkConfig e3db.ToznySDKConfig
+	var toznySDK *e3db.ToznySDKV3
+	var err error
+
+	// If specified parse and load client credentials from file
+	if clientCredentialsFilepath != "" {
+		sdkConfigFileJSON, err := e3db.LoadConfigFile(clientCredentialsFilepath)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+		sdkConfig = e3db.ToznySDKConfig{
+			ClientConfig: e3dbClients.ClientConfig{
+				ClientID:  sdkConfigFileJSON.ClientID,
+				APIKey:    sdkConfigFileJSON.APIKeyID,
+				APISecret: sdkConfigFileJSON.APISecret,
+				Host:      sdkConfigFileJSON.APIBaseURL,
+				AuthNHost: sdkConfigFileJSON.APIBaseURL,
+				SigningKeys: e3dbClients.SigningKeys{
+					Public: e3dbClients.Key{
+						Type:     e3dbClients.DefaultSigningKeyType,
+						Material: sdkConfigFileJSON.PublicSigningKey,
+					},
+					Private: e3dbClients.Key{
+						Type:     e3dbClients.DefaultSigningKeyType,
+						Material: sdkConfigFileJSON.PrivateSigningKey,
+					},
+				},
+				EncryptionKeys: e3dbClients.EncryptionKeys{
+					Private: e3dbClients.Key{
+						Material: sdkConfigFileJSON.PrivateKey,
+						Type:     e3dbClients.DefaultEncryptionKeyType,
+					},
+					Public: e3dbClients.Key{
+						Material: sdkConfigFileJSON.PublicKey,
+						Type:     e3dbClients.DefaultEncryptionKeyType,
+					},
+				},
+			},
+			AccountUsername: sdkConfigFileJSON.AccountUsername,
+			AccountPassword: sdkConfigFileJSON.AccountPassword,
+			APIEndpoint:     sdkConfigFileJSON.APIBaseURL,
+		}
+	} else {
+		// Otherwise attempt to derive credentials
+		// error condition
+		// derive client credentials by logging in
+	}
+	// Allow for overriding of any file based config via top level provider configuration
+	if username != "" {
+		sdkConfig.AccountUsername = username
+	}
+	if password != "" {
+		sdkConfig.AccountUsername = password
+	}
+	if apiEndpoint != "" {
+		sdkConfig.APIEndpoint = apiEndpoint
+	}
+
+	toznySDK, err = e3db.NewToznySDKV3(sdkConfig)
+
 	if err != nil {
 		return toznySDK, diag.FromErr(err)
 	}
+
 	return toznySDK, diags
 }
