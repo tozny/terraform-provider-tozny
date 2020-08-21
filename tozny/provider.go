@@ -34,12 +34,11 @@ func Provider() *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("TOZNY_ACCOUNT_PASSWORD", nil),
 			},
 			"tozny_credentials_json_filepath": &schema.Schema{
-				Description:   "Filepath to Tozny client credentials in JSON format.",
-				Type:          schema.TypeString,
-				Optional:      true,
-				Sensitive:     true,
-				DefaultFunc:   schema.EnvDefaultFunc("TOZNY_CLIENT_CREDENTIALS_FILEPATH", ""),
-				ConflictsWith: []string{"account_username", "account_password"},
+				Description: "Filepath to Tozny client credentials in JSON format.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Sensitive:   true,
+				DefaultFunc: schema.EnvDefaultFunc("TOZNY_CLIENT_CREDENTIALS_FILEPATH", ""),
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
@@ -65,7 +64,11 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	clientCredentialsFilepath := d.Get("tozny_credentials_json_filepath").(string)
 
 	var sdkConfig e3db.ToznySDKConfig
-	var toznySDK *e3db.ToznySDKV3
+	toznySDK := &e3db.ToznySDKV3{
+		AccountUsername: username,
+		AccountPassword: password,
+		APIEndpoint:     apiEndpoint,
+	}
 	var err error
 
 	// If specified parse and load client credentials from file
@@ -107,9 +110,46 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 			APIEndpoint:     sdkConfigFileJSON.APIBaseURL,
 		}
 	} else {
-		// Otherwise attempt to derive credentials
-		// error condition
+		// Otherwise attempt to derive credentials based off provider config
 		// derive client credentials by logging in
+		accountConfig, err := toznySDK.Login(ctx, username, password, "password", toznySDK.APIEndpoint)
+		// Don't abort on error as valid provider config is optional or not desired for all resource use cases
+		if err == nil {
+			clientConfig := accountConfig.Config
+			// seed sdk config with client credentials
+			sdkConfig = e3db.ToznySDKConfig{
+				ClientConfig: e3dbClients.ClientConfig{
+					ClientID:  clientConfig.ClientID,
+					APIKey:    clientConfig.APIKeyID,
+					APISecret: clientConfig.APISecret,
+					Host:      clientConfig.APIURL,
+					AuthNHost: clientConfig.APIURL,
+					SigningKeys: e3dbClients.SigningKeys{
+						Public: e3dbClients.Key{
+							Type:     e3dbClients.DefaultSigningKeyType,
+							Material: clientConfig.PublicSigningKey,
+						},
+						Private: e3dbClients.Key{
+							Type:     e3dbClients.DefaultSigningKeyType,
+							Material: clientConfig.PrivateSigningKey,
+						},
+					},
+					EncryptionKeys: e3dbClients.EncryptionKeys{
+						Private: e3dbClients.Key{
+							Material: clientConfig.PrivateKey,
+							Type:     e3dbClients.DefaultEncryptionKeyType,
+						},
+						Public: e3dbClients.Key{
+							Material: clientConfig.PublicKey,
+							Type:     e3dbClients.DefaultEncryptionKeyType,
+						},
+					},
+				},
+				AccountUsername: username,
+				AccountPassword: password,
+				APIEndpoint:     clientConfig.APIURL,
+			}
+		}
 	}
 	// Allow for overriding of any file based config via top level provider configuration
 	if username != "" {
