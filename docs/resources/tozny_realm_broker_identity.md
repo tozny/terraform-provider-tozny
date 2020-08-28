@@ -1,18 +1,12 @@
-# Configure the Terraform runtime
-terraform {
-  required_version = ">= 0.13"
-  required_providers {
-    tozny = {
-      # Pull signed provider binaries from
-      # the Terraform hosted registry namespace
-      # for Tozny registry.terraform.io/tozny
-      source  = "tozny/tozny"
-      # Pin Tozny provider version
-      version = ">=0.0.4"
-    }
-  }
-}
+# tozny_realm_broker_identity Resource
 
+A resource for provisioning an Identity for brokering Realm activities such as email recovery.
+
+This resource requires that the account username and password be supplied to the provider either via explicit provider settings or file based credentials.
+
+## Example Usage
+
+```hcl
 # Include the Tozny Terraform provider
 provider "tozny" {
   api_endpoint = "http://platform.local.tozny.com:8000"
@@ -84,4 +78,19 @@ resource "tozny_realm_broker_identity" "broker_identity" {
   name = "broker${tozny_realm.my_organizations_realm.realm_name}"
   broker_identity_credentials_save_filepath = "./${tozny_realm.my_organizations_realm.realm_name}_broker_identity_credentials.json"
 }
+```
 
+## Argument Reference
+
+### Top-Level Arguments
+
+* `client_registration_token` - (Required) Token to use when registering the Identity's client.
+* `realm_name` - (Required) The name of the Realm to register the brokering Identity for
+* `name` - (Required) User defined name for the brokering Identity
+* `broker_identity_credentials_save_filepath` - (Required) The filepath to persist the provisioned Identities credentials to.
+* `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the provider to use when provisioning this realm. For this resource either this value or both `account_username` and `account_password` must be set on the provider.
+* `identity_id` - (Computed) Server defined unique identifier for the brokering Identity.
+
+## Attribute Reference
+
+* `id` - Unique ID of the provisioned brokering Identity.
