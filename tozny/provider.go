@@ -45,6 +45,7 @@ func Provider() *schema.Provider {
 			"tozny_account":                   resourceAccount(),
 			"tozny_realm":                     resourceRealm(),
 			"tozny_client_registration_token": resourceClientRegistrationToken(),
+			"tozny_realm_broker_identity":     resourceRealmBrokerIdentity(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
