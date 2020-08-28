@@ -7,7 +7,6 @@ import (
   "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
   "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
   "github.com/tozny/e3db-clients-go/identityClient"
-  "github.com/tozny/e3db-go/v2"
 )
 
 // resourceRealm returns the schema and methods for provisioning a Tozny Realm.
@@ -94,14 +93,12 @@ func resourceRealmCreate(ctx context.Context, d *schema.ResourceData, m interfac
   var diags diag.Diagnostics
   var err error
 
-  toznySDK := m.(*e3db.ToznySDKV3)
-
   toznyClientCredentialsFilePath := d.Get("client_credentials_filepath").(string)
-  if toznyClientCredentialsFilePath != "" {
-    toznySDK, err = e3db.GetSDKV3(toznyClientCredentialsFilePath)
-    if err != nil {
-      return diag.FromErr(err)
-    }
+
+  toznySDK, err := MakeToznySDK(toznyClientCredentialsFilePath, m)
+
+  if err != nil {
+    return diag.FromErr(err)
   }
 
   realm, err := toznySDK.CreateRealm(ctx, identityClient.CreateRealmRequest{
@@ -135,17 +132,16 @@ func resourceRealmRead(ctx context.Context, d *schema.ResourceData, m interface{
   var diags diag.Diagnostics
   var err error
 
-  toznySDK := m.(*e3db.ToznySDKV3)
-
   toznyClientCredentialsFilePath := d.Get("client_credentials_filepath").(string)
-  if toznyClientCredentialsFilePath != "" {
-    toznySDK, err = e3db.GetSDKV3(toznyClientCredentialsFilePath)
-    if err != nil {
-      return diag.FromErr(err)
-    }
+
+  toznySDK, err := MakeToznySDK(toznyClientCredentialsFilePath, m)
+
+  if err != nil {
+    return diag.FromErr(err)
   }
 
   realm, err := toznySDK.DescribeRealm(ctx, d.Get("realm_name").(string))
+
   if err != nil {
     return diag.FromErr(err)
   }
@@ -169,17 +165,16 @@ func resourceRealmDelete(ctx context.Context, d *schema.ResourceData, m interfac
   var diags diag.Diagnostics
   var err error
 
-  toznySDK := m.(*e3db.ToznySDKV3)
-
   toznyClientCredentialsFilePath := d.Get("client_credentials_filepath").(string)
-  if toznyClientCredentialsFilePath != "" {
-    toznySDK, err = e3db.GetSDKV3(toznyClientCredentialsFilePath)
-    if err != nil {
-      return diag.FromErr(err)
-    }
+
+  toznySDK, err := MakeToznySDK(toznyClientCredentialsFilePath, m)
+
+  if err != nil {
+    return diag.FromErr(err)
   }
 
   err = toznySDK.DeleteRealm(ctx, d.Get("realm_name").(string))
+
   if err != nil {
     return diag.FromErr(err)
   }

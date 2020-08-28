@@ -42,8 +42,9 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"tozny_account": resourceAccount(),
-			"tozny_realm":   resourceRealm(),
+			"tozny_account":                   resourceAccount(),
+			"tozny_realm":                     resourceRealm(),
+			"tozny_client_registration_token": resourceClientRegistrationToken(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
@@ -156,7 +157,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		sdkConfig.AccountUsername = username
 	}
 	if password != "" {
-		sdkConfig.AccountUsername = password
+		sdkConfig.AccountPassword = password
 	}
 	if apiEndpoint != "" {
 		sdkConfig.APIEndpoint = apiEndpoint
