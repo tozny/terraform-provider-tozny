@@ -89,8 +89,8 @@ resource "tozny_realm_broker_identity" "broker_identity" {
 * `name` - (Required) User defined name for the brokering Identity
 * `broker_identity_credentials_save_filepath` - (Required) The filepath to persist the provisioned Identities credentials to.
 * `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the provider to use when provisioning this realm. For this resource either this value or both `account_username` and `account_password` must be set on the provider.
-* `identity_id` - (Computed) Server defined unique identifier for the brokering Identity.
+* `identity_client_id` - (Computed) Server defined unique identifier for the brokering Identity's client.
 
 ## Attribute Reference
 
-* `id` - Unique ID of the provisioned brokering Identity.
+* `id` - Server defined unique identifier for the brokering Identity's client.
