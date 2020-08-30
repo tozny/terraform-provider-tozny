@@ -2,7 +2,6 @@ package tozny
 
 import (
   "context"
-  "fmt"
 
   "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
   "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -39,7 +38,6 @@ func resourceRealmBrokerIdentity() *schema.Resource {
         Description: "The filepath to persist the provisioned Identities credentials to.",
         Type:        schema.TypeString,
         Required:    true,
-        Default:     false,
         ForceNew:    true,
       },
       "client_credentials_filepath": {
@@ -48,9 +46,9 @@ func resourceRealmBrokerIdentity() *schema.Resource {
         Optional:    true,
         ForceNew:    true,
       },
-      "identity_id": {
-        Description: "Server defined unique identifier for the brokering Identity.",
-        Type:        schema.TypeInt,
+      "identity_client_id": {
+        Description: "Server defined unique identifier for the brokering Identity's client.",
+        Type:        schema.TypeString,
         Computed:    true,
         ForceNew:    true,
       },
@@ -94,7 +92,7 @@ func resourceRealmBrokerIdentityCreate(ctx context.Context, d *schema.ResourceDa
     return diag.FromErr(err)
   }
 
-  realmBrokerIdedentityId := registeredBrokerIdentity.Identity.ID
+  realmBrokerIdedentityId := registeredBrokerIdentity.Identity.ToznyID.String()
 
   d.Set("identity_id", realmBrokerIdedentityId)
 
@@ -112,7 +110,7 @@ func resourceRealmBrokerIdentityCreate(ctx context.Context, d *schema.ResourceDa
   }
 
   // Associate created realm broker identity with Terraform state and signal success
-  d.SetId(fmt.Sprintf("%d", realmBrokerIdedentityId))
+  d.SetId(realmBrokerIdedentityId)
 
   return diags
 }

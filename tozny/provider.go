@@ -46,6 +46,7 @@ func Provider() *schema.Provider {
 			"tozny_realm":                     resourceRealm(),
 			"tozny_client_registration_token": resourceClientRegistrationToken(),
 			"tozny_realm_broker_identity":     resourceRealmBrokerIdentity(),
+			"tozny_realm_broker_delegation":   resourceRealmBrokerDelegation(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
@@ -66,19 +67,24 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	clientCredentialsFilepath := d.Get("tozny_credentials_json_filepath").(string)
 
 	var sdkConfig e3db.ToznySDKConfig
+
 	toznySDK := &e3db.ToznySDKV3{
 		AccountUsername: username,
 		AccountPassword: password,
 		APIEndpoint:     apiEndpoint,
 	}
+
 	var err error
 
 	// If specified parse and load client credentials from file
 	if clientCredentialsFilepath != "" {
+
 		sdkConfigFileJSON, err := e3db.LoadConfigFile(clientCredentialsFilepath)
+
 		if err != nil {
 			return nil, diag.FromErr(err)
 		}
+
 		sdkConfig = e3db.ToznySDKConfig{
 			ClientConfig: e3dbClients.ClientConfig{
 				ClientID:  sdkConfigFileJSON.ClientID,

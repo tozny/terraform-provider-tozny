@@ -1,18 +1,12 @@
-# Configure the Terraform runtime
-terraform {
-  required_version = ">= 0.13"
-  required_providers {
-    tozny = {
-      # Pull signed provider binaries from
-      # the Terraform hosted registry namespace
-      # for Tozny registry.terraform.io/tozny
-      source  = "tozny/tozny"
-      # Pin Tozny provider version
-      version = ">=0.0.4"
-    }
-  }
-}
+# tozny_realm_broker_delegation Resource
 
+A resource for delegating authority to another Tozny client (either hosted by Tozny or some other third party) to broker realm activities (such as email recovery).
+
+This resource requires that the account username and password be supplied to the provider either via explicit provider settings or file based credentials.
+
+## Example Usage
+
+```hcl
 # Include the Tozny Terraform provider
 provider "tozny" {
   api_endpoint = "http://platform.local.tozny.com:8000"
@@ -98,3 +92,19 @@ resource "tozny_realm_broker_delegation" "allow_tozny_hosted_brokering_policy" {
   realm_broker_identity_credentials_filepath = "./${tozny_realm.my_organizations_realm.realm_name}_broker_identity_credentials.json"
   use_tozny_hosted_broker = true
 }
+```
+
+## Argument Reference
+
+### Top-Level Arguments
+
+* `realm_broker_identity_credentials_filepath` - (Required) The filepath to load the realm broker identity to delegate access to.
+* `use_tozny_hosted_broker` - (Optional) Whether to delegate realm brokering to the Tozny Hosted Broker. Defaults to true.
+* `client_id_to_delegate_brokering` - (Required) Client ID to delegate realm brokering to.
+* `delegated_broker_client_id` - (Optional) The ID of the client realm brokering is delegated to.
+* `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the provider to use when provisioning this realm. For this resource either this value or both `account_username` and `account_password` must be set on the provider.
+* `broker_token_record_id` - (Computed) ID of the  TozStore record containing material to derive the realm broker identity credentials.
+
+## Attribute Reference
+
+* `id` - ID of the  TozStore record containing material to derive the realm broker identity credentials.
