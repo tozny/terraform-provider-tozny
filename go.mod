@@ -5,6 +5,6 @@ go 1.14
 require (
 	github.com/google/uuid v1.1.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.0.1
-	github.com/tozny/e3db-clients-go v0.0.97-0.20200831045600-55bed4f2efcf
-	github.com/tozny/e3db-go/v2 v2.2.6-0.20200831051723-7392d49ef6c9
+	github.com/tozny/e3db-clients-go v0.0.98
+	github.com/tozny/e3db-go/v2 v2.2.6
 )
