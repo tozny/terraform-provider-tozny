@@ -48,6 +48,7 @@ func Provider() *schema.Provider {
 			"tozny_realm_broker_identity":     resourceRealmBrokerIdentity(),
 			"tozny_realm_broker_delegation":   resourceRealmBrokerDelegation(),
 			"tozny_realm_application":         resourceRealmApplication(),
+			"tozny_realm_provider":            resourceRealmProvider(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
