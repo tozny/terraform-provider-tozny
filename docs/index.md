@@ -2,7 +2,7 @@
 
 Tozny Terraform provider for Infrastructure As Code (IAC) automation of Tozny products.
 
-Can be used to provision Accounts, along with associated Clients, Realms and Identities.
+Can be used to provision Accounts, along with associated Clients, Realms and Identities, Applications and Providers.
 
 [About Tozny](https://tozny.com).
 
