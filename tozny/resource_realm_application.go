@@ -68,7 +68,7 @@ func resourceRealmApplication() *schema.Resource {
       "application_id": {
         Description: "Server defined unique identifier for the Application.",
         Type:        schema.TypeString,
-        Optional:    true,
+        Computed:    true,
         ForceNew:    true,
       },
     },
