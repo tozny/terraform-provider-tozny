@@ -37,4 +37,4 @@ release:
 	goreleaser release --rm-dist
 
 test:
-	./examples/realms/applications/test.sh
+	./examples/realms/applications/roles/test.sh
