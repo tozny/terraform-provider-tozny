@@ -115,6 +115,18 @@ resource "tozny_realm_application" "jenkins_oidc_application" {
   oidc_root_url = "https://jenkins.acme.com"
 }
 
+# A resource for creating an application role
+resource "tozny_realm_application_role" "jenkins_role" {
+  depends_on = [
+    tozny_realm_application.jenkins_oidc_application
+  ]
+  client_credentials_filepath = local.tozny_client_credentials_filepath
+  name = "Jenkins Role"
+  description = "The role that jenkins uses"
+  realm_name = tozny_realm.my_organizations_realm.realm_name
+  application_id = tozny_realm_application.jenkins_oidc_application.application_id
+}
+
 # A resource for creating a SAML based realm application
 resource "tozny_realm_application" "aws_saml_application" {
   # Block on and use client credentials generated from the provisioned account
