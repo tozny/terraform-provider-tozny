@@ -35,3 +35,6 @@ version:
 
 release:
 	goreleaser release --rm-dist
+
+test:
+	./examples/realms/applications/test.sh
