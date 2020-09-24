@@ -85,7 +85,8 @@ resource "tozny_realm_application_role" "jenkins_role" {
 
 * `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the Terraform provider to use when provisioning this realm identity provider.
 * `application_role_id` - (Computed) Service defined unique identifier for the application role.
-* `realm_name` - (Required) The name of the realm to associate the application role with.
+* `application_id` - (Required) The application ID with which to associate the application role.
+* `realm_name` - (Required) The name of the realm with which to associate the application role.
 * `name` - (Required) User defined name for the application role.
 
 ## Attribute Reference
