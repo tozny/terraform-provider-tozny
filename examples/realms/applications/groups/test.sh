@@ -12,14 +12,13 @@ test_result=$(cat terraform.tfstate | jq \
 	def assertEquals(x;y): if x == y then . else . as $in | "assertion failed: \(x) != \(y)" | debug | $in end;
 
 	resource("my_organizations_realm") as $realm |
-	resource("jenkins_role") as $application_role |
+	resource("my_first_group") as $group |
 
 	assert($realm.id != null and $realm.id != ""; "expected realm to have id") |
 	assertEquals($realm.sovereign_name; "Administrator") |
 
-	assert($application_role.id != null and $application_role.id != ""; "expected application role to have id") |
-	assertEquals($application_role.name; "Jenkins Role") |
-	assertEquals($application_role.description; "The role that jenkins uses")
+	assert($group.id != null and $group.id != ""; "expected application role to have id") |
+	assertEquals($group.name; "My First Group")
 	' 2>&1  > /dev/null)
 
 yes yes | terraform destroy
