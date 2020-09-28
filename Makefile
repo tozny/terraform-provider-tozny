@@ -8,6 +8,7 @@ all: lint install
 lint:
 	go vet ./...
 	go mod tidy
+	go fmt ./...
 
 build:
 	go build -o ${BINARY}
@@ -38,3 +39,4 @@ release:
 
 test:
 	./examples/realms/applications/roles/test.sh
+	./examples/realms/applications/groups/test.sh
