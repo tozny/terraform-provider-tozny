@@ -21,19 +21,19 @@ func resourceRealmGroup() *schema.Resource {
 				ForceNew:    true,
 			},
 			"realm_name": {
-				Description: "The name of the Realm to provision the Application Role for.",
+				Description: "The name of the Realm to provision the group for.",
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
 			},
 			"name": {
-				Description: "Human readable/reference-able name for the application role.",
+				Description: "Human readable/reference-able name for the group.",
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
 			},
 			"group_id": {
-				Description: "Server defined unique identifier for the Application role.",
+				Description: "Server defined unique identifier for the group.",
 				Type:        schema.TypeString,
 				Computed:    true,
 				ForceNew:    true,
