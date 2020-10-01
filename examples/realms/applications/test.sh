@@ -21,6 +21,7 @@ test_result=$(cat terraform.tfstate | jq \
 	assertEquals($application.client_id; "jenkins-oid-app") |
 	assertEquals($application.name; "Jenkins") |
 	assertEquals($application.active; true) |
+	assertEquals($application.allowed_origins; ["https://jenkins.acme.com/allowed"]) |
 	assertEquals($application.protocol; "openid-connect") |
 	assertEquals($application.oidc_root_url; "https://jenkins.acme.com") |
 	assertEquals($application.oidc_standard_flow_enabled; true) |
