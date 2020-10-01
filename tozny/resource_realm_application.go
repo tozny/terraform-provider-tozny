@@ -59,6 +59,19 @@ func resourceRealmApplication() *schema.Resource {
         Optional:    true,
         ForceNew:    true,
       },
+      "oidc_standard_flow_enabled": {
+        Description: "Whether the OIDC standard flow is enabled",
+        Type:        schema.TypeBool,
+        Optional:    true,
+        Default:     true,
+        ForceNew:    true,
+      },
+      "oidc_base_url": {
+        Description: "The OIDC base URL.",
+        Type:        schema.TypeString,
+        Optional:    true,
+        ForceNew:    true,
+      },
       "saml_endpoint": {
         Description: "URL used for every binding to both the SP's Assertion Consumer and Single Logout Services. This can be individually overridden for each binding and service.",
         Type:        schema.TypeString,
@@ -95,6 +108,8 @@ func resourceRealmApplicationCreate(ctx context.Context, d *schema.ResourceData,
       Protocol: strings.ToLower(d.Get("protocol").(string)),
       OIDCSettings: identityClient.ApplicationOIDCSettings{
         RootURL: d.Get("oidc_root_url").(string),
+        StandardFlowEnabled: d.Get("oidc_standard_flow_enabled").(bool),
+        BaseURL: d.Get("oidc_base_url").(string),
       },
       SAMLSettings: identityClient.ApplicationSAMLSettings{
         DefaultSAMLEndpoint: d.Get("saml_endpoint").(string),
@@ -138,7 +153,13 @@ func resourceRealmApplicationRead(ctx context.Context, d *schema.ResourceData, m
     return diag.FromErr(err)
   }
 
+  d.Set("client_id", application.ClientID)
+  d.Set("name", application.Name)
   d.Set("active", application.Active)
+  d.Set("protocol", application.Protocol)
+  d.Set("oidc_root_url", application.OIDCSettings.RootURL)
+  d.Set("oidc_standard_flow_enabled", application.OIDCSettings.StandardFlowEnabled)
+  d.Set("oidc_base_url", application.OIDCSettings.BaseURL)
 
   return diags
 }
