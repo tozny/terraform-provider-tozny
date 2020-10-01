@@ -111,6 +111,7 @@ resource "tozny_realm_application" "jenkins_oidc_application" {
   client_id = "jenkins-oid-app"
   name = "Jenkins"
   active = true
+  allowed_origins = [ "https://jenkins.acme.com/allowed" ]
   protocol = "openid-connect"
   oidc_root_url = "https://jenkins.acme.com"
   oidc_standard_flow_enabled = true

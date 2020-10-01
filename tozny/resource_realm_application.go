@@ -53,6 +53,15 @@ func resourceRealmApplication() *schema.Resource {
         Default:     true,
         ForceNew:    true,
       },
+      "allowed_origins": {
+        Description: "The allowed origins for the application.",
+        Type:        schema.TypeList,
+        Elem: &schema.Schema{
+          Type: schema.TypeString,
+        },
+        Optional: true,
+        ForceNew: true,
+      },
       "oidc_root_url": {
         Description: "The URL to append to any relative URLs.",
         Type:        schema.TypeString,
@@ -99,6 +108,12 @@ func resourceRealmApplicationCreate(ctx context.Context, d *schema.ResourceData,
     return diag.FromErr(err)
   }
 
+  var allowedOrigins []string
+
+  for _, allowedOrigin := range d.Get("allowed_origins").([]interface{}) {
+    allowedOrigins = append(allowedOrigins, allowedOrigin.(string))
+  }
+
   createApplicationParams := identityClient.CreateRealmApplicationRequest{
     RealmName: d.Get("realm_name").(string),
     Application: identityClient.Application{
@@ -106,6 +121,7 @@ func resourceRealmApplicationCreate(ctx context.Context, d *schema.ResourceData,
       Name:     d.Get("name").(string),
       Active:   d.Get("active").(bool),
       Protocol: strings.ToLower(d.Get("protocol").(string)),
+      AllowedOrigins: allowedOrigins,
       OIDCSettings: identityClient.ApplicationOIDCSettings{
         RootURL: d.Get("oidc_root_url").(string),
         StandardFlowEnabled: d.Get("oidc_standard_flow_enabled").(bool),
@@ -156,6 +172,7 @@ func resourceRealmApplicationRead(ctx context.Context, d *schema.ResourceData, m
   d.Set("client_id", application.ClientID)
   d.Set("name", application.Name)
   d.Set("active", application.Active)
+  d.Set("allowed_origins", application.AllowedOrigins)
   d.Set("protocol", application.Protocol)
   d.Set("oidc_root_url", application.OIDCSettings.RootURL)
   d.Set("oidc_standard_flow_enabled", application.OIDCSettings.StandardFlowEnabled)
