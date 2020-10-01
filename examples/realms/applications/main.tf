@@ -113,6 +113,7 @@ resource "tozny_realm_application" "jenkins_oidc_application" {
   active = true
   allowed_origins = [ "https://jenkins.acme.com/allowed" ]
   protocol = "openid-connect"
+  oidc_access_type = "bearer-only"
   oidc_root_url = "https://jenkins.acme.com"
   oidc_standard_flow_enabled = true
   oidc_base_url = "https://jenkins.acme.com/baseurl"
