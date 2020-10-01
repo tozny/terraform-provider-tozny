@@ -113,6 +113,8 @@ resource "tozny_realm_application" "jenkins_oidc_application" {
   active = true
   protocol = "openid-connect"
   oidc_root_url = "https://jenkins.acme.com"
+  oidc_standard_flow_enabled = true
+  oidc_base_url = "https://jenkins.acme.com/baseurl"
 }
 
 # A resource for creating a SAML based realm application
