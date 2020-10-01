@@ -62,6 +62,13 @@ func resourceRealmApplication() *schema.Resource {
         Optional: true,
         ForceNew: true,
       },
+      "oidc_access_type": {
+        Description: "The OIDC access type.",
+        Type:        schema.TypeString,
+        Optional:    true,
+        ForceNew:    true,
+        Default:     "confidential",
+      },
       "oidc_root_url": {
         Description: "The URL to append to any relative URLs.",
         Type:        schema.TypeString,
