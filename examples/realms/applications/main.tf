@@ -133,4 +133,14 @@ resource "tozny_realm_application" "aws_saml_application" {
   active = true
   protocol = "saml"
   saml_endpoint = "https://samuel/saml/iam"
+  saml_include_authn_statement = true
+  saml_include_one_time_use_condition = true
+  saml_sign_documents = true
+  saml_sign_assertions = true
+  saml_client_signature_required = true
+  saml_force_post_binding = true
+  saml_force_name_id_format = true
+  saml_name_id_format = "name_id_format"
+  saml_idp_initiated_sso_url_name = "sso_url_name"
+  saml_assertion_consumer_service_post_binding_url = "post_binding_url"
 }
