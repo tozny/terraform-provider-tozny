@@ -121,8 +121,18 @@ resource "tozny_realm_application" "aws_saml_application" {
   client_id = "aws-saml-app"
   name = "AWS"
   active = true
-  client_protocol = "saml"
+  protocol = "saml"
   saml_endpoint = "https://samuel/saml/iam"
+  saml_include_authn_statement = true
+  saml_include_one_time_use_condition = true
+  saml_sign_documents = true
+  saml_sign_assertions = true
+  saml_client_signature_required = true
+  saml_force_post_binding = true
+  saml_force_name_id_format = true
+  saml_name_id_format = "name_id_format"
+  saml_idp_initiated_sso_url_name = "sso_url_name"
+  saml_assertion_consumer_service_post_binding_url = "post_binding_url"
 }
 ```
 
@@ -136,8 +146,21 @@ resource "tozny_realm_application" "aws_saml_application" {
 * `name` - (Required) Human readable/reference-able name for the application.
 * `protocol` - (Required) What protocol (e.g. OpenIDConnect or SAML) is used to authenticate with the application. Valid values are `openid-connect`, `saml`.
 * `active` - (Optional) Whether this consumer is allowed to authenticate and authorize identities. Defaults to `true`.
+* `oidc_access_type` - (Optional) The OIDC access type.
 * `oidc_root_url` - (Optional) The URL to append to any relative URLs.
+* `oidc_standard_flow_enabled` - (Optional) Whether the OIDC standard flow is enabled
+* `oidc_base_url` - (Optional) The OIDC base URL.
 * `saml_endpoint` - (Optional) URL used for every binding to both the SP's Assertion Consumer and Single Logout Services. This can be individually overridden for each binding and service.
+* `saml_include_authn_statement` - (Optional) Whether to include the Authn statement.
+* `saml_include_one_time_use_condition` - (Optional) Whether to include the one time use condition.
+* `saml_sign_documents` - (Optional) Whether to sign documents.
+* `saml_sign_assertions` - (Optional) Whether to sign assertions.
+* `saml_client_signature_required` - (Optional) Whether client signature is required.
+* `saml_force_post_binding` - (Optional) Whether to force POST binding.
+* `saml_force_name_id_format` - (Optional) Whether to force name ID format.
+* `saml_name_id_format` - (Optional) The name ID format
+* `saml_idp_initiated_sso_url_name` - (Optional) The IDP initiated SSO URL name.
+* `saml_assertion_consumer_service_post_binding_url` - (Optional) The assertion consumer service post bind URL.
 * `application_id` - (Computed) Server defined unique identifier for the Application.
 
 ## Attribute Reference
