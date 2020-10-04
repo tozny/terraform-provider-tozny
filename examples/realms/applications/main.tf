@@ -111,12 +111,14 @@ resource "tozny_realm_application" "jenkins_oidc_application" {
   client_id = "jenkins-oid-app"
   name = "Jenkins"
   active = true
-  allowed_origins = [ "https://jenkins.acme.com/allowed" ]
   protocol = "openid-connect"
-  oidc_access_type = "bearer-only"
-  oidc_root_url = "https://jenkins.acme.com"
-  oidc_standard_flow_enabled = true
-  oidc_base_url = "https://jenkins.acme.com/baseurl"
+  oidc_settings {
+    allowed_origins = [ "https://jenkins.acme.com/allowed" ]
+    access_type = "bearer-only"
+    root_url = "https://jenkins.acme.com"
+    standard_flow_enabled = true
+    base_url = "https://jenkins.acme.com/baseurl"
+  }
 }
 
 # A resource for creating a SAML based realm application
@@ -132,15 +134,17 @@ resource "tozny_realm_application" "aws_saml_application" {
   name = "AWS"
   active = true
   protocol = "saml"
-  saml_endpoint = "https://samuel/saml/iam"
-  saml_include_authn_statement = true
-  saml_include_one_time_use_condition = true
-  saml_sign_documents = true
-  saml_sign_assertions = true
-  saml_client_signature_required = true
-  saml_force_post_binding = true
-  saml_force_name_id_format = true
-  saml_name_id_format = "name_id_format"
-  saml_idp_initiated_sso_url_name = "sso_url_name"
-  saml_assertion_consumer_service_post_binding_url = "post_binding_url"
+  saml_settings {
+    default_endpoint = "https://samuel/saml/iam"
+    include_authn_statement = true
+    include_one_time_use_condition = true
+    sign_documents = true
+    sign_assertions = true
+    client_signature_required = true
+    force_post_binding = true
+    force_name_id_format = true
+    name_id_format = "name_id_format"
+    idp_initiated_sso_url_name = "sso_url_name"
+    assertion_consumer_service_post_binding_url = "post_binding_url"
+  }
 }
