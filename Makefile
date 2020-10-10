@@ -1,5 +1,5 @@
 BINARY=terraform-provider-tozny
-VERSION=0.0.6
+VERSION=0.0.7
 
 default: build
 
@@ -39,4 +39,4 @@ release:
 
 test:
 	./examples/realms/applications/roles/test.sh
-	./examples/realms/applications/groups/test.sh
+	./examples/realms/groups/test.sh
