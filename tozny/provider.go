@@ -50,6 +50,7 @@ func Provider() *schema.Provider {
 			"tozny_realm_application":         resourceRealmApplication(),
 			"tozny_realm_application_role":    resourceRealmApplicationRole(),
 			"tozny_realm_group":               resourceRealmGroup(),
+			"tozny_realm_group_role_mappings": resourceRealmGroupRoleMappings(),
 			"tozny_realm_provider":            resourceRealmProvider(),
 			"tozny_realm_provider_mapper":     resourceRealmProviderMapper(),
 		},

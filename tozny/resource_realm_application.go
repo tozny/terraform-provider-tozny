@@ -309,7 +309,6 @@ func resourceRealmApplicationRead(ctx context.Context, d *schema.ResourceData, m
 	// only set saml settings if no oidc_settings
 
 	if len(maybeTerraformOIDCSettings) == 0 {
-
 		d.Set("saml_settings", []interface{}{
 			map[string]interface{}{
 				"default_endpoint":                            application.SAMLSettings.DefaultEndpoint,
