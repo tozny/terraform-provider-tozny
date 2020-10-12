@@ -163,7 +163,9 @@ resource "tozny_realm_group_role_mappings" "admin_members_role_mappings" {
   depends_on = [
     tozny_realm.my_organizations_realm,
     tozny_realm_group.admin_members,
-    tozny_realm_application_role.jenkins_admin_role
+    tozny_realm_application_role.jenkins_admin_role,
+    tozny_realm_application_role.jenkins_read_only_role
+
   ]
   client_credentials_filepath = local.tozny_client_credentials_filepath
   realm_name = tozny_realm.my_organizations_realm.realm_name
@@ -171,10 +173,12 @@ resource "tozny_realm_group_role_mappings" "admin_members_role_mappings" {
   application_role {
     application_id = tozny_realm_application.jenkins_oidc_application.application_id
     role_id = tozny_realm_application_role.jenkins_admin_role.application_role_id
+    role_name = tozny_realm_application_role.jenkins_admin_role.name
   }
   application_role {
     application_id = tozny_realm_application.jenkins_oidc_application.application_id
     role_id = tozny_realm_application_role.jenkins_read_only_role.application_role_id
+    role_name = tozny_realm_application_role.jenkins_read_only_role.name
   }
 }
 ```
@@ -191,6 +195,7 @@ resource "tozny_realm_group_role_mappings" "admin_members_role_mappings" {
 
 * `role_id` - (Required) Service defined unique identifier for the application role.
 * `application_id` - (Required) The application ID associated with the application role.
+* `role_name` - (Required) User defined unique identifier for the application scoped role.
 
 ## Attribute Reference
 

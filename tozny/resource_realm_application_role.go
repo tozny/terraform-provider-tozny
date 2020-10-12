@@ -2,6 +2,8 @@ package tozny
 
 import (
 	"context"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tozny/e3db-clients-go/identityClient"
@@ -66,7 +68,7 @@ func resourceRealmApplicationRoleCreate(ctx context.Context, d *schema.ResourceD
 	}
 
 	createApplicationRoleParams := identityClient.CreateRealmApplicationRoleRequest{
-		RealmName:     d.Get("realm_name").(string),
+		RealmName:     strings.ToLower(d.Get("realm_name").(string)),
 		ApplicationID: d.Get("application_id").(string),
 		ApplicationRole: identityClient.ApplicationRole{
 			Name:        d.Get("name").(string),
@@ -100,9 +102,9 @@ func resourceRealmApplicationRoleRead(ctx context.Context, d *schema.ResourceDat
 	}
 
 	applicationRole, err := toznySDK.DescribeRealmApplicationRole(ctx, identityClient.DescribeRealmApplicationRoleRequest{
-		RealmName:         d.Get("realm_name").(string),
-		ApplicationID:     d.Get("application_id").(string),
-		ApplicationRoleID: d.Get("application_role_id").(string),
+		RealmName:           strings.ToLower(d.Get("realm_name").(string)),
+		ApplicationID:       d.Get("application_id").(string),
+		ApplicationRoleName: d.Get("name").(string),
 	})
 
 	if err != nil {
@@ -127,9 +129,9 @@ func resourceRealmApplicationRoleDelete(ctx context.Context, d *schema.ResourceD
 	}
 
 	err = toznySDK.DeleteRealmApplicationRole(ctx, identityClient.DeleteRealmApplicationRoleRequest{
-		RealmName:         d.Get("realm_name").(string),
-		ApplicationID:     d.Get("application_id").(string),
-		ApplicationRoleID: d.Get("application_role_id").(string),
+		RealmName:           strings.ToLower(d.Get("realm_name").(string)),
+		ApplicationID:       d.Get("application_id").(string),
+		ApplicationRoleName: d.Get("name").(string),
 	})
 
 	if err != nil {
