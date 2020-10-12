@@ -2,6 +2,8 @@ package tozny
 
 import (
 	"context"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tozny/e3db-clients-go/identityClient"
@@ -54,7 +56,7 @@ func resourceRealmGroupCreate(ctx context.Context, d *schema.ResourceData, m int
 	}
 
 	createGroupParams := identityClient.CreateRealmGroupRequest{
-		RealmName: d.Get("realm_name").(string),
+		RealmName: strings.ToLower(d.Get("realm_name").(string)),
 		Group: identityClient.Group{
 			Name: d.Get("name").(string),
 		},
@@ -86,7 +88,7 @@ func resourceRealmGroupRead(ctx context.Context, d *schema.ResourceData, m inter
 	}
 
 	group, err := toznySDK.DescribeRealmGroup(ctx, identityClient.DescribeRealmGroupRequest{
-		RealmName: d.Get("realm_name").(string),
+		RealmName: strings.ToLower(d.Get("realm_name").(string)),
 		GroupID:   d.Get("group_id").(string),
 	})
 
@@ -111,7 +113,7 @@ func resourceRealmGroupDelete(ctx context.Context, d *schema.ResourceData, m int
 	}
 
 	err = toznySDK.DeleteRealmGroup(ctx, identityClient.DeleteRealmGroupRequest{
-		RealmName: d.Get("realm_name").(string),
+		RealmName: strings.ToLower(d.Get("realm_name").(string)),
 		GroupID:   d.Get("group_id").(string),
 	})
 
