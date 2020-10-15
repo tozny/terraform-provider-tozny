@@ -43,10 +43,11 @@ func Provider() *schema.Provider {
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"tozny_account":                   resourceAccount(),
-			"tozny_realm":                     resourceRealm(),
 			"tozny_client_registration_token": resourceClientRegistrationToken(),
 			"tozny_realm_broker_identity":     resourceRealmBrokerIdentity(),
 			"tozny_realm_broker_delegation":   resourceRealmBrokerDelegation(),
+			"tozny_realm":                     resourceRealm(),
+			"tozny_realm_role":                resourceRealmRole(),
 			"tozny_realm_application":         resourceRealmApplication(),
 			"tozny_realm_application_role":    resourceRealmApplicationRole(),
 			"tozny_realm_group":               resourceRealmGroup(),
