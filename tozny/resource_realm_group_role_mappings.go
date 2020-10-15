@@ -63,6 +63,34 @@ func resourceRealmGroupRoleMappings() *schema.Resource {
 					},
 				},
 			},
+			"realm_role": {
+				Description: "Configuration for mapping a realm role to members of a group.",
+				Type:        schema.TypeList,
+				Optional:    true,
+				ForceNew:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"realm_id": {
+							Description: "The realm ID associated with the realm role.",
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+						},
+						"role_id": {
+							Description: "Service defined unique identifier for the realm role.",
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+						},
+						"role_name": {
+							Description: "User defined unique identifier for the realm scoped role.",
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -79,15 +107,32 @@ func resourceRealmGroupRoleMappingsCreate(ctx context.Context, d *schema.Resourc
 	}
 	// Attempt to add any role mappings specified by this resource
 	maybeTerraformApplicationRoleMappings := d.Get("application_role").([]interface{})
-	if len(maybeTerraformApplicationRoleMappings) > 0 {
-		roleMappings := groupRoleMappingsFromTerraform(maybeTerraformApplicationRoleMappings)
+	applicationRolesToMap := len(maybeTerraformApplicationRoleMappings) > 0
+	var applicationRoleMappings map[string][]identityClient.Role
+	if applicationRolesToMap {
+		applicationRoleMappings = groupApplicationRoleMappingsFromTerraform(maybeTerraformApplicationRoleMappings)
+	}
 
-		err = toznySDK.AddGroupRoleMappings(ctx, identityClient.RemoveGroupRoleMappingsRequest{
+	maybeTerraformRealmRoleMappings := d.Get("realm_role").([]interface{})
+	realmRolesToMap := len(maybeTerraformRealmRoleMappings) > 0
+	var realmRoleMappings []identityClient.Role
+	if realmRolesToMap {
+		realmRoleMappings = groupRealmRoleMappingsFromTerraform(maybeTerraformRealmRoleMappings)
+	}
+
+	if applicationRolesToMap || realmRolesToMap {
+		addGroupRoleMappingsRequest := identityClient.AddGroupRoleMappingsRequest{
 			RealmName:   strings.ToLower(d.Get("realm_name").(string)),
 			GroupID:     d.Get("group_id").(string),
-			RoleMapping: roleMappings,
-		})
-
+			RoleMapping: identityClient.RoleMapping{},
+		}
+		if applicationRolesToMap {
+			addGroupRoleMappingsRequest.RoleMapping.ClientRoles = applicationRoleMappings
+		}
+		if realmRolesToMap {
+			addGroupRoleMappingsRequest.RoleMapping.RealmRoles = realmRoleMappings
+		}
+		err = toznySDK.AddGroupRoleMappings(ctx, addGroupRoleMappingsRequest)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -121,19 +166,18 @@ func resourceRealmGroupRoleMappingsRead(ctx context.Context, d *schema.ResourceD
 
 	// Check whether we need to update state for this specific
 	// group role mappings, which is only if one of the specified role mappings
-	// don't exist on the server
+	var doUpdateState bool
+	matchingGroupRoleMappings := identityClient.RoleMapping{
+		ClientRoles: map[string][]identityClient.Role{},
+	}
+
 	maybeTerraformApplicationRoleMappings := d.Get("application_role").([]interface{})
-	if len(maybeTerraformApplicationRoleMappings) > 0 {
-		terraformGroupRoleMappings := groupRoleMappingsFromTerraform(maybeTerraformApplicationRoleMappings)
-		matchingGroupRoleMappings := identityClient.RoleMapping{
-			ClientRoles: map[string][]identityClient.Role{},
-		}
-		var doUpdateState bool
-		// Only check client application roles as that is currently
-		// the only role type supported for provisioning with this resource
+	applicationRolesToMap := len(maybeTerraformApplicationRoleMappings) > 0
+	if applicationRolesToMap {
+		terraformApplicationGroupRoleMappings := groupApplicationRoleMappingsFromTerraform(maybeTerraformApplicationRoleMappings)
 		// Group checking at a per application level so can skip any roles for applications this resource doesn't
 		// map roles for
-		for applicationID, terraformGroupApplicationRoleMappings := range terraformGroupRoleMappings.ClientRoles {
+		for applicationID, terraformGroupApplicationRoleMappings := range terraformApplicationGroupRoleMappings {
 			applicationRoles, groupApplicationRoleMappingExists := groupRoleMappings.ClientRoles[applicationID]
 			if !groupApplicationRoleMappingExists {
 				doUpdateState = true
@@ -154,22 +198,54 @@ func resourceRealmGroupRoleMappingsRead(ctx context.Context, d *schema.ResourceD
 				}
 			}
 		}
-		if doUpdateState {
-			var terraformRoleMappings []interface{}
-			for applicationID, roleMappings := range matchingGroupRoleMappings.ClientRoles {
-				for _, roleMapping := range roleMappings {
-					terraformRoleMapping := map[string]interface{}{
-						"application_id": applicationID,
-						"role_id":        roleMapping.ID,
-						"role_name":      roleMapping.Name,
-					}
-					terraformRoleMappings = append(terraformRoleMappings, terraformRoleMapping)
+	}
+
+	maybeTerraformRealmRoleMappings := d.Get("realm_role").([]interface{})
+	realmRolesToMap := len(maybeTerraformRealmRoleMappings) > 0
+	if realmRolesToMap {
+		terraformRealmGroupRoleMappings := groupRealmRoleMappingsFromTerraform(maybeTerraformRealmRoleMappings)
+		// Iterate over each specified realm role mapped for this group
+		// and verify it exists on the server
+		for _, terraformRealmGroupRoleMapping := range terraformRealmGroupRoleMappings {
+			var matchingRoleFound bool
+			for _, realmRole := range groupRoleMappings.RealmRoles {
+				if realmRole.ID == terraformRealmGroupRoleMapping.ID {
+					matchingRoleFound = true
+					matchingGroupRoleMappings.RealmRoles = append(matchingGroupRoleMappings.RealmRoles, realmRole)
 				}
 			}
-			d.Set("application_role", terraformRoleMappings)
+			// Role doesn't exist, need to update Terraform state
+			if !matchingRoleFound {
+				doUpdateState = true
+			}
 		}
 	}
 
+	if doUpdateState {
+		var terraformApplicationRoleMappings []interface{}
+		for applicationID, roleMappings := range matchingGroupRoleMappings.ClientRoles {
+			for _, roleMapping := range roleMappings {
+				terraformApplicationRoleMapping := map[string]interface{}{
+					"application_id": applicationID,
+					"role_id":        roleMapping.ID,
+					"role_name":      roleMapping.Name,
+				}
+				terraformApplicationRoleMappings = append(terraformApplicationRoleMappings, terraformApplicationRoleMapping)
+			}
+		}
+		d.Set("application_role", terraformApplicationRoleMappings)
+
+		var terraformRealmRoleMappings []interface{}
+		for _, roleMapping := range matchingGroupRoleMappings.RealmRoles {
+			terraformRealmRoleMapping := map[string]interface{}{
+				"realm_id":  roleMapping.ContainerID,
+				"role_id":   roleMapping.ID,
+				"role_name": roleMapping.Name,
+			}
+			terraformRealmRoleMappings = append(terraformRealmRoleMappings, terraformRealmRoleMapping)
+		}
+		d.Set("realm_role", terraformRealmRoleMappings)
+	}
 	return diags
 }
 
@@ -185,15 +261,32 @@ func resourceRealmGroupRoleMappingsDelete(ctx context.Context, d *schema.Resourc
 	}
 	// Attempt to delete any role mappings added by this resource
 	maybeTerraformApplicationRoleMappings := d.Get("application_role").([]interface{})
-	if len(maybeTerraformApplicationRoleMappings) > 0 {
-		roleMappings := groupRoleMappingsFromTerraform(maybeTerraformApplicationRoleMappings)
+	applicationRolesToMap := len(maybeTerraformApplicationRoleMappings) > 0
+	var applicationRoleMappings map[string][]identityClient.Role
+	if applicationRolesToMap {
+		applicationRoleMappings = groupApplicationRoleMappingsFromTerraform(maybeTerraformApplicationRoleMappings)
+	}
 
-		err = toznySDK.RemoveGroupRoleMappings(ctx, identityClient.RemoveGroupRoleMappingsRequest{
+	maybeTerraformRealmRoleMappings := d.Get("realm_role").([]interface{})
+	realmRolesToMap := len(maybeTerraformRealmRoleMappings) > 0
+	var realmRoleMappings []identityClient.Role
+	if realmRolesToMap {
+		realmRoleMappings = groupRealmRoleMappingsFromTerraform(maybeTerraformRealmRoleMappings)
+	}
+
+	if applicationRolesToMap || realmRolesToMap {
+		addGroupRoleMappingsRequest := identityClient.RemoveGroupRoleMappingsRequest{
 			RealmName:   strings.ToLower(d.Get("realm_name").(string)),
 			GroupID:     d.Get("group_id").(string),
-			RoleMapping: roleMappings,
-		})
-
+			RoleMapping: identityClient.RoleMapping{},
+		}
+		if applicationRolesToMap {
+			addGroupRoleMappingsRequest.RoleMapping.ClientRoles = applicationRoleMappings
+		}
+		if realmRolesToMap {
+			addGroupRoleMappingsRequest.RoleMapping.RealmRoles = realmRoleMappings
+		}
+		err = toznySDK.RemoveGroupRoleMappings(ctx, addGroupRoleMappingsRequest)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -205,13 +298,11 @@ func resourceRealmGroupRoleMappingsDelete(ctx context.Context, d *schema.Resourc
 	return diags
 }
 
-func groupRoleMappingsFromTerraform(data []interface{}) identityClient.RoleMapping {
-	roleMappings := identityClient.RoleMapping{
-		ClientRoles: map[string][]identityClient.Role{},
-	}
+func groupApplicationRoleMappingsFromTerraform(data []interface{}) map[string][]identityClient.Role {
+	roleMappings := map[string][]identityClient.Role{}
 	for _, terraformRoleMapping := range data {
 		applicationRole := applicationRoleFromTerraform(terraformRoleMapping.(map[string]interface{}))
-		roleMappings.ClientRoles[applicationRole.ContainerID] = append(roleMappings.ClientRoles[applicationRole.ContainerID], applicationRole)
+		roleMappings[applicationRole.ContainerID] = append(roleMappings[applicationRole.ContainerID], applicationRole)
 	}
 	return roleMappings
 }
@@ -222,6 +313,25 @@ func applicationRoleFromTerraform(data map[string]interface{}) identityClient.Ro
 		ContainerID: data["application_id"].(string),
 		Name:        data["role_name"].(string),
 		ClientRole:  true,
+	}
+	return role
+}
+
+func groupRealmRoleMappingsFromTerraform(data []interface{}) []identityClient.Role {
+	var roleMappings []identityClient.Role
+	for _, terraformRoleMapping := range data {
+		realmRole := realmRoleFromTerraform(terraformRoleMapping.(map[string]interface{}))
+		roleMappings = append(roleMappings, realmRole)
+	}
+	return roleMappings
+}
+
+func realmRoleFromTerraform(data map[string]interface{}) identityClient.Role {
+	role := identityClient.Role{
+		ID:          data["role_id"].(string),
+		ContainerID: data["realm_id"].(string),
+		Name:        data["role_name"].(string),
+		ClientRole:  false,
 	}
 	return role
 }

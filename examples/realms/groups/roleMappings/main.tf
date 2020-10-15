@@ -8,7 +8,7 @@ terraform {
       # for Tozny registry.terraform.io/tozny
       source  = "tozny/tozny"
       # Pin Tozny provider version
-      version = ">=0.0.7"
+      version = ">=0.0.8"
     }
   }
 }
@@ -150,13 +150,24 @@ resource "tozny_realm_group" "admin_members" {
   realm_name = tozny_realm.my_organizations_realm.realm_name
 }
 
+# A resource for creating a realm role
+resource "tozny_realm_role" "admin_role" {
+  depends_on = [
+    tozny_realm.my_organizations_realm
+  ]
+  client_credentials_filepath = local.tozny_client_credentials_filepath
+  name = "Admin Role"
+  description = "Allow all."
+  realm_name = tozny_realm.my_organizations_realm.realm_name
+}
+
 resource "tozny_realm_group_role_mappings" "admin_members_role_mappings" {
   depends_on = [
     tozny_realm.my_organizations_realm,
     tozny_realm_group.admin_members,
     tozny_realm_application_role.jenkins_admin_role,
-    tozny_realm_application_role.jenkins_read_only_role
-
+    tozny_realm_application_role.jenkins_read_only_role,
+    tozny_realm_role.admin_role
   ]
   client_credentials_filepath = local.tozny_client_credentials_filepath
   realm_name = tozny_realm.my_organizations_realm.realm_name
@@ -170,5 +181,11 @@ resource "tozny_realm_group_role_mappings" "admin_members_role_mappings" {
     application_id = tozny_realm_application.jenkins_oidc_application.application_id
     role_id = tozny_realm_application_role.jenkins_read_only_role.application_role_id
     role_name = tozny_realm_application_role.jenkins_read_only_role.name
+  }
+
+  realm_role {
+    realm_id = tozny_realm_role.admin_role.role_realm_id
+    role_id = tozny_realm_role.admin_role.realm_role_id
+    role_name = tozny_realm_role.admin_role.name
   }
 }

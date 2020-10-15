@@ -7,21 +7,6 @@ This resource requires that the account username and password be supplied to the
 ## Example Usage
 
 ```hcl
-# Configure the Terraform runtime
-terraform {
-  required_version = ">= 0.13"
-  required_providers {
-    tozny = {
-      # Pull signed provider binaries from
-      # the Terraform hosted registry namespace
-      # for Tozny registry.terraform.io/tozny
-      source  = "tozny/tozny"
-      # Pin Tozny provider version
-      version = ">=0.0.7"
-    }
-  }
-}
-
 # Include the Tozny Terraform provider
 provider "tozny" {
   api_endpoint = "http://platform.local.tozny.com:8000"
@@ -159,13 +144,24 @@ resource "tozny_realm_group" "admin_members" {
   realm_name = tozny_realm.my_organizations_realm.realm_name
 }
 
+# A resource for creating a realm role
+resource "tozny_realm_role" "admin_role" {
+  depends_on = [
+    tozny_realm.my_organizations_realm
+  ]
+  client_credentials_filepath = local.tozny_client_credentials_filepath
+  name = "Admin Role"
+  description = "Allow all."
+  realm_name = tozny_realm.my_organizations_realm.realm_name
+}
+
 resource "tozny_realm_group_role_mappings" "admin_members_role_mappings" {
   depends_on = [
     tozny_realm.my_organizations_realm,
     tozny_realm_group.admin_members,
     tozny_realm_application_role.jenkins_admin_role,
-    tozny_realm_application_role.jenkins_read_only_role
-
+    tozny_realm_application_role.jenkins_read_only_role,
+    tozny_realm_role.admin_role
   ]
   client_credentials_filepath = local.tozny_client_credentials_filepath
   realm_name = tozny_realm.my_organizations_realm.realm_name
@@ -180,6 +176,12 @@ resource "tozny_realm_group_role_mappings" "admin_members_role_mappings" {
     role_id = tozny_realm_application_role.jenkins_read_only_role.application_role_id
     role_name = tozny_realm_application_role.jenkins_read_only_role.name
   }
+
+  realm_role {
+    realm_id = tozny_realm_role.admin_role.role_realm_id
+    role_id = tozny_realm_role.admin_role.realm_role_id
+    role_name = tozny_realm_role.admin_role.name
+  }
 }
 ```
 
@@ -190,12 +192,20 @@ resource "tozny_realm_group_role_mappings" "admin_members_role_mappings" {
 * `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the provider to use when provisioning this realm group role mapping. For this resource either this value or both `account_username` and `account_password` must be set on the provider.
 * `realm_name` - (Required) The name of the Realm to provision the Application for.
 * `group_id` - (Required) Server defined unique identifier for the group to provision role mappings for.
+* `application_role` (Optional) An application role to map to members of the group.
+* `realm_role` (Optional) Configuration for mapping a realm role to members of a group.
 
 ### Application Role Schema
 
 * `role_id` - (Required) Service defined unique identifier for the application role.
 * `application_id` - (Required) The application ID associated with the application role.
 * `role_name` - (Required) User defined unique identifier for the application scoped role.
+
+### Realm Role Schema
+
+* `role_id` - (Required) Service defined unique identifier for the realm role.
+* `realm_id` - (Required) The `role_realm_id` value for a `tozny_realm_role` resource.
+* `role_name` - (Required) User defined unique identifier for the realm scoped role.
 
 ## Attribute Reference
 
