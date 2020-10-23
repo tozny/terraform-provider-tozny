@@ -2,6 +2,7 @@
 terraform-provider-tozny
 # Credential files generated or used by the running provider when executing examples
 examples/**/*.json
+examples/**/*.txt
 # output from gorelease driven provider build
 dist/
 # Local .terraform directories
