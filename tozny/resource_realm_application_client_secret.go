@@ -21,7 +21,7 @@ func resourceRealmApplicationClientSecret() *schema.Resource {
 			"client_credentials_filepath": {
 				Description: "The filepath to Tozny client credentials for the Terraform provider to use when provisioning this application client secret.",
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
 			},
 			"realm_name": {
