@@ -35,10 +35,10 @@ func MakeToznySession(ctx context.Context, sdkCredentialsFilePath string, terraf
 // MakeToznySDK uses Terraform provider and resource configuration to create a Tozny SDK provider,
 // returning the SDK and error (if any).
 func MakeToznySDK(sdkCredentialsFilePath string, terraformProviderConfig interface{}) (*e3db.ToznySDKV3, error) {
-	toznySDK := terraformProviderConfig.(*e3db.ToznySDKV3)
-
-	var err error
-
+	toznySDK, err := terraformProviderConfig.(TerraformToznySDKResult).SDK, terraformProviderConfig.(TerraformToznySDKResult).Err
+	if err != nil {
+		return toznySDK, err
+	}
 	if sdkCredentialsFilePath != "" {
 		toznySDK, err = e3db.GetSDKV3(sdkCredentialsFilePath)
 
