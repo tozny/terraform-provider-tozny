@@ -299,7 +299,7 @@ func resourceAccount() *schema.Resource {
 func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	toznySDK := m.(*e3db.ToznySDKV3)
+	toznySDK := m.(TerraformToznySDKResult).SDK
 
 	var createAccountParams accountClient.CreateAccountRequest
 
