@@ -129,6 +129,7 @@ resource "tozny_realm_application" "aws_saml_application" {
   active = true
   protocol = "saml"
   saml_settings {
+    allowed_origins = [ "https://example.frontend.com" ]
     default_endpoint = "https://samuel/saml/iam"
     include_authn_statement = true
     include_one_time_use_condition = true
@@ -160,13 +161,14 @@ resource "tozny_realm_application" "aws_saml_application" {
 
 ### OIDC Settings Schema
 
-* `allowed_origins` - (Optional) The client urls from which this application is accessible from.
+* `allowed_origins` - (Optional) The list of network locations that are allowed to be used by clients when accessing this application.
 * `access_type` - (Optional) The OIDC access type.
 * `root_url` - (Optional) The URL to append to any relative URLs.
 * `standard_flow_enabled` - (Optional) Whether the OIDC standard flow is enabled
 * `base_url` - (Optional) The OIDC base URL.
 
 ### SAML Settings Schema
+`allowed_origins` - (Optional) The list of network locations that are allowed to be used by clients when accessing this application.
 * `default_endpoint` - (Optional) URL used for every binding to both the SP's Assertion Consumer and Single Logout Services. This can be individually overridden for each binding and service.
 * `include_authn_statement` - (Optional) Whether to include the Authn statement.
 * `include_one_time_use_condition` - (Optional) Whether to include the one time use condition.

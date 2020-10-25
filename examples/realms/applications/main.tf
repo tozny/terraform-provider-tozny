@@ -8,7 +8,7 @@ terraform {
       # for Tozny registry.terraform.io/tozny
       source  = "tozny/tozny"
       # Pin Tozny provider version
-      version = ">=0.9.1"
+      version = ">=0.9.5"
     }
   }
 }
@@ -135,6 +135,7 @@ resource "tozny_realm_application" "aws_saml_application" {
   active = true
   protocol = "saml"
   saml_settings {
+    allowed_origins = [ "https://example.frontend.com" ]
     default_endpoint = "https://samuel/saml/iam"
     include_authn_statement = true
     include_one_time_use_condition = true
