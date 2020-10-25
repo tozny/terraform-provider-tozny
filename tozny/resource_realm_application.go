@@ -68,14 +68,13 @@ func resourceRealmApplication() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"allowed_origins": {
-							Description: "The allowed origins for the application.",
+							Description: "The list of network locations that are allowed to be used by clients when accessing this application.",
 							Type:        schema.TypeList,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
-							Optional:      true,
-							ForceNew:      true,
-							ConflictsWith: []string{"saml_settings"},
+							Optional: true,
+							ForceNew: true,
 						},
 						"access_type": {
 							Description: "The OIDC access type.",
@@ -114,6 +113,15 @@ func resourceRealmApplication() *schema.Resource {
 				ConflictsWith: []string{"oidc_settings"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"allowed_origins": {
+							Description: "The list of network locations that are allowed to be used by clients when accessing this application.",
+							Type:        schema.TypeList,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Optional: true,
+							ForceNew: true,
+						},
 						"default_endpoint": {
 							Description: "URL used for every binding to both the SP's Assertion Consumer and Single Logout Services. This can be individually overridden for each binding and service.",
 							Type:        schema.TypeString,
@@ -214,11 +222,9 @@ func resourceRealmApplicationCreate(ctx context.Context, d *schema.ResourceData,
 		terraformOIDCSettings := maybeTerraformOIDCSettings[0].(map[string]interface{})
 
 		var allowedOrigins []string
-
 		for _, allowedOrigin := range terraformOIDCSettings["allowed_origins"].([]interface{}) {
 			allowedOrigins = append(allowedOrigins, allowedOrigin.(string))
 		}
-
 		createApplicationParams.Application.AllowedOrigins = allowedOrigins
 
 		createApplicationParams.Application.OIDCSettings = identityClient.ApplicationOIDCSettings{
@@ -233,6 +239,12 @@ func resourceRealmApplicationCreate(ctx context.Context, d *schema.ResourceData,
 
 	if len(maybeTerraformSAMLSettings) > 0 {
 		terraformSAMLSettings := maybeTerraformSAMLSettings[0].(map[string]interface{})
+
+		var allowedOrigins []string
+		for _, allowedOrigin := range terraformSAMLSettings["allowed_origins"].([]interface{}) {
+			allowedOrigins = append(allowedOrigins, allowedOrigin.(string))
+		}
+		createApplicationParams.Application.AllowedOrigins = allowedOrigins
 
 		createApplicationParams.Application.SAMLSettings = identityClient.ApplicationSAMLSettings{
 			DefaultEndpoint:                        terraformSAMLSettings["default_endpoint"].(string),
@@ -311,6 +323,7 @@ func resourceRealmApplicationRead(ctx context.Context, d *schema.ResourceData, m
 	if len(maybeTerraformOIDCSettings) == 0 {
 		d.Set("saml_settings", []interface{}{
 			map[string]interface{}{
+				"allowed_origins":                             application.AllowedOrigins,
 				"default_endpoint":                            application.SAMLSettings.DefaultEndpoint,
 				"include_authn_statement":                     application.SAMLSettings.IncludeAuthnStatement,
 				"include_one_time_use_condition":              application.SAMLSettings.IncludeOneTimeUseCondition,
