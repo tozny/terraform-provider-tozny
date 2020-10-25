@@ -75,24 +75,20 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	clientCredentialsFilepath := d.Get("tozny_credentials_json_filepath").(string)
 
 	var sdkConfig e3db.ToznySDKConfig
-
 	toznySDK := &e3db.ToznySDKV3{
 		AccountUsername: username,
 		AccountPassword: password,
 		APIEndpoint:     apiEndpoint,
 	}
 
+	var terraformToznySDKResult TerraformToznySDKResult
 	var err error
-
 	// If specified parse and load client credentials from file
 	if clientCredentialsFilepath != "" {
-
 		sdkConfigFileJSON, err := e3db.LoadConfigFile(clientCredentialsFilepath)
-
 		if err != nil {
 			return nil, diag.FromErr(err)
 		}
-
 		sdkConfig = e3db.ToznySDKConfig{
 			ClientConfig: e3dbClients.ClientConfig{
 				ClientID:  sdkConfigFileJSON.ClientID,
@@ -128,44 +124,49 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	} else {
 		// Otherwise attempt to derive credentials based off provider config
 		// derive client credentials by logging in
-		accountConfig, err := toznySDK.Login(ctx, username, password, "password", toznySDK.APIEndpoint)
+		var accountConfig e3db.Account
+		accountConfig, err = toznySDK.Login(ctx, username, password, "password", toznySDK.APIEndpoint)
 		// Don't abort on error as valid provider config is optional or not desired for all resource use cases
-		if err == nil {
-			clientConfig := accountConfig.Config
-			// seed sdk config with client credentials
-			sdkConfig = e3db.ToznySDKConfig{
-				ClientConfig: e3dbClients.ClientConfig{
-					ClientID:  clientConfig.ClientID,
-					APIKey:    clientConfig.APIKeyID,
-					APISecret: clientConfig.APISecret,
-					Host:      clientConfig.APIURL,
-					AuthNHost: clientConfig.APIURL,
-					SigningKeys: e3dbClients.SigningKeys{
-						Public: e3dbClients.Key{
-							Type:     e3dbClients.DefaultSigningKeyType,
-							Material: clientConfig.PublicSigningKey,
-						},
-						Private: e3dbClients.Key{
-							Type:     e3dbClients.DefaultSigningKeyType,
-							Material: clientConfig.PrivateSigningKey,
-						},
+		if err != nil {
+			terraformToznySDKResult.SDK = toznySDK
+			terraformToznySDKResult.Err = err
+			return terraformToznySDKResult, diags
+		}
+		clientConfig := accountConfig.Config
+		// seed sdk config with client credentials
+		sdkConfig = e3db.ToznySDKConfig{
+			ClientConfig: e3dbClients.ClientConfig{
+				ClientID:  clientConfig.ClientID,
+				APIKey:    clientConfig.APIKeyID,
+				APISecret: clientConfig.APISecret,
+				Host:      clientConfig.APIURL,
+				AuthNHost: clientConfig.APIURL,
+				SigningKeys: e3dbClients.SigningKeys{
+					Public: e3dbClients.Key{
+						Type:     e3dbClients.DefaultSigningKeyType,
+						Material: clientConfig.PublicSigningKey,
 					},
-					EncryptionKeys: e3dbClients.EncryptionKeys{
-						Private: e3dbClients.Key{
-							Material: clientConfig.PrivateKey,
-							Type:     e3dbClients.DefaultEncryptionKeyType,
-						},
-						Public: e3dbClients.Key{
-							Material: clientConfig.PublicKey,
-							Type:     e3dbClients.DefaultEncryptionKeyType,
-						},
+					Private: e3dbClients.Key{
+						Type:     e3dbClients.DefaultSigningKeyType,
+						Material: clientConfig.PrivateSigningKey,
 					},
 				},
-				AccountUsername: username,
-				AccountPassword: password,
-				APIEndpoint:     clientConfig.APIURL,
-			}
+				EncryptionKeys: e3dbClients.EncryptionKeys{
+					Private: e3dbClients.Key{
+						Material: clientConfig.PrivateKey,
+						Type:     e3dbClients.DefaultEncryptionKeyType,
+					},
+					Public: e3dbClients.Key{
+						Material: clientConfig.PublicKey,
+						Type:     e3dbClients.DefaultEncryptionKeyType,
+					},
+				},
+			},
+			AccountUsername: username,
+			AccountPassword: password,
+			APIEndpoint:     clientConfig.APIURL,
 		}
+
 	}
 	// Allow for overriding of any file based config via top level provider configuration
 	if username != "" {
@@ -181,8 +182,15 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	toznySDK, err = e3db.NewToznySDKV3(sdkConfig)
 
 	if err != nil {
-		return toznySDK, diag.FromErr(err)
+		terraformToznySDKResult.Err = err
+		return terraformToznySDKResult, diag.FromErr(err)
 	}
+	terraformToznySDKResult.SDK = toznySDK
+	terraformToznySDKResult.Err = nil
+	return terraformToznySDKResult, diags
+}
 
-	return toznySDK, diags
+type TerraformToznySDKResult struct {
+	SDK *e3db.ToznySDKV3
+	Err error
 }
