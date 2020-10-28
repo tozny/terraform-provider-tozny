@@ -111,6 +111,8 @@ resource "tozny_realm_application" "jenkins_oidc_application" {
     access_type = "bearer-only"
     root_url = "https://jenkins.acme.com"
     standard_flow_enabled = true
+    implicit_flow_enabled = true
+    direct_access_grants_enabled = false
     base_url = "https://jenkins.acme.com/baseurl"
   }
 }
@@ -164,7 +166,9 @@ resource "tozny_realm_application" "aws_saml_application" {
 * `allowed_origins` - (Optional) The list of network locations that are allowed to be used by clients when accessing this application.
 * `access_type` - (Optional) The OIDC access type.
 * `root_url` - (Optional) The URL to append to any relative URLs.
-* `standard_flow_enabled` - (Optional) Whether the OIDC standard flow is enabled
+* `standard_flow_enabled` - (Optional) Whether the OIDC standard flow is enabled. Defaults to true.
+* `implicit_flow_enabled` - (Optional) Whether the OIDC implicit flow is enabled. Defaults to false.
+* `direct_access_grants_enabled` - (Optional) Whether for OIDC flows direct access grants are enabled. Defaults to false.
 * `base_url` - (Optional) The OIDC base URL.
 
 ### SAML Settings Schema

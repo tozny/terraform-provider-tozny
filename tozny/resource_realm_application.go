@@ -96,6 +96,20 @@ func resourceRealmApplication() *schema.Resource {
 							Default:     true,
 							ForceNew:    true,
 						},
+						"implicit_flow_enabled": {
+							Description: "Whether the OIDC implicit flow is enabled",
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+							ForceNew:    true,
+						},
+						"direct_access_grants_enabled": {
+							Description: "Whether for OIDC flows direct access grants are enabled.",
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+							ForceNew:    true,
+						},
 						"base_url": {
 							Description: "The OIDC base URL.",
 							Type:        schema.TypeString,
@@ -228,10 +242,12 @@ func resourceRealmApplicationCreate(ctx context.Context, d *schema.ResourceData,
 		createApplicationParams.Application.AllowedOrigins = allowedOrigins
 
 		createApplicationParams.Application.OIDCSettings = identityClient.ApplicationOIDCSettings{
-			RootURL:             terraformOIDCSettings["root_url"].(string),
-			StandardFlowEnabled: terraformOIDCSettings["standard_flow_enabled"].(bool),
-			BaseURL:             terraformOIDCSettings["base_url"].(string),
-			AccessType:          terraformOIDCSettings["access_type"].(string),
+			RootURL:                   terraformOIDCSettings["root_url"].(string),
+			StandardFlowEnabled:       terraformOIDCSettings["standard_flow_enabled"].(bool),
+			ImplicitFlowEnabled:       terraformOIDCSettings["implicit_flow_enabled"].(bool),
+			DirectAccessGrantsEnabled: terraformOIDCSettings["direct_access_grants_enabled"].(bool),
+			BaseURL:                   terraformOIDCSettings["base_url"].(string),
+			AccessType:                terraformOIDCSettings["access_type"].(string),
 		}
 	}
 
@@ -308,11 +324,13 @@ func resourceRealmApplicationRead(ctx context.Context, d *schema.ResourceData, m
 	if len(maybeTerraformSAMLSettings) == 0 {
 		d.Set("oidc_settings", []interface{}{
 			map[string]interface{}{
-				"allowed_origins":       application.AllowedOrigins,
-				"root_url":              application.OIDCSettings.RootURL,
-				"standard_flow_enabled": application.OIDCSettings.StandardFlowEnabled,
-				"base_url":              application.OIDCSettings.BaseURL,
-				"access_type":           application.OIDCSettings.AccessType,
+				"allowed_origins":              application.AllowedOrigins,
+				"root_url":                     application.OIDCSettings.RootURL,
+				"standard_flow_enabled":        application.OIDCSettings.StandardFlowEnabled,
+				"implicit_flow_enabled":        application.OIDCSettings.ImplicitFlowEnabled,
+				"direct_access_grants_enabled": application.OIDCSettings.DirectAccessGrantsEnabled,
+				"base_url":                     application.OIDCSettings.BaseURL,
+				"access_type":                  application.OIDCSettings.AccessType,
 			},
 		})
 	}
