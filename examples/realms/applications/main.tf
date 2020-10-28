@@ -8,7 +8,7 @@ terraform {
       # for Tozny registry.terraform.io/tozny
       source  = "tozny/tozny"
       # Pin Tozny provider version
-      version = ">=0.9.5"
+      version = ">=0.9.6"
     }
   }
 }
@@ -117,6 +117,8 @@ resource "tozny_realm_application" "jenkins_oidc_application" {
     access_type = "bearer-only"
     root_url = "https://jenkins.acme.com"
     standard_flow_enabled = true
+    implicit_flow_enabled = true
+    direct_access_grants_enabled = true
     base_url = "https://jenkins.acme.com/baseurl"
   }
 }
