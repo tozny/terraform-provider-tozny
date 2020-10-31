@@ -56,6 +56,9 @@ func Provider() *schema.Provider {
 			"tozny_realm_provider":                  resourceRealmProvider(),
 			"tozny_realm_provider_mapper":           resourceRealmProviderMapper(),
 		},
+		DataSourcesMap: map[string]*schema.Resource{
+			"tozny_realm_application_saml_description": dataSourceRealmApplicationSAMLDescription(),
+		},
 		ConfigureContextFunc: providerConfigure,
 	}
 }
