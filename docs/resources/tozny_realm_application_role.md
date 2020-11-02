@@ -132,6 +132,7 @@ resource "tozny_realm_application_role" "jenkins_role" {
 * `application_id` - (Required) The application ID with which to associate the application role.
 * `realm_name` - (Required) The name of the realm with which to associate the application role.
 * `name` - (Required) User defined name for the application role.
+* `description` - (Required) Human readable description for the application role.
 
 ## Attribute Reference
 
