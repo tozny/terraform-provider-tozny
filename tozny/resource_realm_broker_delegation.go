@@ -121,7 +121,7 @@ func resourceRealmBrokerDelegationCreate(ctx context.Context, d *schema.Resource
 	}
 
 	if clientIDToDelegateBrokering != "" {
-		err := toznySDK.AddAuthorizedSharer(ctx, pdsClient.AddAuthorizedWriterRequest{
+		err := toznySDK.E3dbPDSClient.AddAuthorizedSharer(ctx, pdsClient.AddAuthorizedWriterRequest{
 			UserID:       sdkClientID,
 			WriterID:     sdkClientID,
 			AuthorizerID: clientIDToDelegateBrokering,
@@ -194,7 +194,7 @@ func resourceRealmBrokerDelegationDelete(ctx context.Context, d *schema.Resource
 	brokerNoteTokenRecordType := fmt.Sprintf("%s.backup.token", broker.RealmName)
 
 	if delegatedBrokerClientID != "" {
-		err := toznySDK.RemoveAuthorizedSharer(ctx, pdsClient.AddAuthorizedWriterRequest{
+		err := toznySDK.E3dbPDSClient.RemoveAuthorizedSharer(ctx, pdsClient.AddAuthorizedWriterRequest{
 			UserID:       sdkClientID,
 			WriterID:     sdkClientID,
 			AuthorizerID: delegatedBrokerClientID,

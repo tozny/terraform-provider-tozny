@@ -58,6 +58,12 @@ func resourceRealm() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 			},
+			"default_registration_token": {
+				Description: "The default registration token to use for registering new Identities with this Realm",
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+			},
 			"sovereign_name": {
 				Description: "User defined sovereign identifier.",
 				Type:        schema.TypeString,
@@ -102,8 +108,9 @@ func resourceRealmCreate(ctx context.Context, d *schema.ResourceData, m interfac
 	}
 
 	realm, err := toznySDK.CreateRealm(ctx, identityClient.CreateRealmRequest{
-		RealmName:     d.Get("realm_name").(string),
-		SovereignName: d.Get("sovereign_name").(string),
+		RealmName:         d.Get("realm_name").(string),
+		SovereignName:     d.Get("sovereign_name").(string),
+		RegistrationToken: d.Get("default_registration_token").(string),
 	})
 
 	if err != nil {
