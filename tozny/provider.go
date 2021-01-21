@@ -14,26 +14,26 @@ import (
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
-			"api_endpoint": &schema.Schema{
+			"api_endpoint": {
 				Description: "Network location for API management and provisioning of Tozny products & services.",
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "https://api.e3db.com",
 			},
-			"account_username": &schema.Schema{
+			"account_username": {
 				Description: "Tozny account username. Used to derive client credentials where appropriate.",
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("TOZNY_ACCOUNT_USERNAME", nil),
 			},
-			"account_password": &schema.Schema{
+			"account_password": {
 				Description: "Tozny account password. Used to derive client credentials where appropriate.",
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   true,
 				DefaultFunc: schema.EnvDefaultFunc("TOZNY_ACCOUNT_PASSWORD", nil),
 			},
-			"tozny_credentials_json_filepath": &schema.Schema{
+			"tozny_credentials_json_filepath": {
 				Description: "Filepath to Tozny client credentials in JSON format.",
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -194,6 +194,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	return terraformToznySDKResult, diags
 }
 
+// TerraformToznySDKResult wraps the Tozny main terraform provider configuration data
 type TerraformToznySDKResult struct {
 	SDK *e3db.ToznySDKV3
 	Err error

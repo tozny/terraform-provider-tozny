@@ -17,10 +17,21 @@ func resourceRealmApplication() *schema.Resource {
 		DeleteContext: resourceRealmApplicationDelete,
 		Schema: map[string]*schema.Schema{
 			"client_credentials_filepath": {
-				Description: "The filepath to Tozny client credentials for the provider to use when provisioning this application.",
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
+				Description:   "The filepath to Tozny client credentials for the provider to use when provisioning this application.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Default:       "",
+				ForceNew:      true,
+				ConflictsWith: []string{"client_credentials_config"},
+			},
+			"client_credentials_config": {
+				Description:   "The Tozny account client configuration as a JSON string",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Default:       "",
+				ForceNew:      true,
+				Sensitive:     true,
+				ConflictsWith: []string{"client_credentials_filepath"},
 			},
 			"realm_name": {
 				Description: "The name of the Realm to provision the Application for.",
@@ -212,9 +223,7 @@ func resourceRealmApplication() *schema.Resource {
 func resourceRealmApplicationCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	toznyClientCredentialsFilePath := d.Get("client_credentials_filepath").(string)
-
-	toznySDK, err := MakeToznySDK(toznyClientCredentialsFilePath, m)
+	toznySDK, err := MakeToznySDK(d, m)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -296,9 +305,7 @@ func resourceRealmApplicationCreate(ctx context.Context, d *schema.ResourceData,
 func resourceRealmApplicationRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	toznyClientCredentialsFilePath := d.Get("client_credentials_filepath").(string)
-
-	toznySDK, err := MakeToznySDK(toznyClientCredentialsFilePath, m)
+	toznySDK, err := MakeToznySDK(d, m)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -363,9 +370,7 @@ func resourceRealmApplicationRead(ctx context.Context, d *schema.ResourceData, m
 func resourceRealmApplicationDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	toznyClientCredentialsFilePath := d.Get("client_credentials_filepath").(string)
-
-	toznySDK, err := MakeToznySDK(toznyClientCredentialsFilePath, m)
+	toznySDK, err := MakeToznySDK(d, m)
 
 	if err != nil {
 		return diag.FromErr(err)

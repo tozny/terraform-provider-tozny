@@ -3,7 +3,6 @@ package tozny
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"io/ioutil"
 	"strings"
 
@@ -18,7 +17,7 @@ import (
 // account credentials suitable for
 // serializing to and from JSON for SDK consumption
 type AccountCredentialsFile struct {
-	APIEndpoit      string `json:"api_url"`
+	APIEndpoint      string `json:"api_url"`
 	AccountUsername string `json:"account_username"`
 	AccountPassword string `json:"account_password"`
 	Account         accountClient.Account
@@ -132,6 +131,13 @@ func resourceAccount() *schema.Resource {
 		ReadContext:   resourceAccountRead,
 		DeleteContext: resourceAccountDelete,
 		Schema: map[string]*schema.Schema{
+			"persist_credentials_to": {
+				Description: "Where to persist the generated account credentials. Default: none, they are not persisted.",
+				Type:        schema.TypeString,
+				Default:     "none",
+				Optional:    true,
+				ForceNew:    true,
+			},
 			"autogenerate_account_credentials": {
 				Description:   "Whether Terraform should generate credentials for a provisioned account.",
 				Type:          schema.TypeBool,
@@ -153,6 +159,11 @@ func resourceAccount() *schema.Resource {
 				Optional:    true,
 				Default:     "tozny_client_credentials.json",
 				ForceNew:    true,
+			},
+			"config": {
+				Description: "the client configuration as a JSON string. Only populated with persist_credentails_to is set to 'terraform'",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"profile": {
 				Description: "The account creator's profile settings.",
@@ -303,7 +314,16 @@ func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interf
 
 	var createAccountParams accountClient.CreateAccountRequest
 
-	accountCredentialsFilepath := d.Get("account_credentials_filepath").(string)
+	autoGenerateKey := "autogenerate_account_credentials"
+
+	persistKey := "persist_credentials_to"
+	persistTo := d.Get(persistKey).(string)
+
+	credentialsFilepathKey := "account_credentials_filepath"
+	accountCredentialsFilepath := d.Get(credentialsFilepathKey).(string)
+
+	saveFilepathKey := "client_credentials_save_filepath"
+	saveFilepath := d.Get(saveFilepathKey).(string)
 
 	var accountUsername, accountPassword string
 
@@ -313,15 +333,21 @@ func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interf
 
 	var accountID string
 
-	if d.Get("autogenerate_account_credentials").(bool) {
+	if d.Get(autoGenerateKey).(bool) {
 		if accountCredentialsFilepath != "" {
-			return diag.FromErr(errors.New("Only one of autogenerate_account_credentials or account_credentials_filepath can be specified"))
+			return diag.Errorf("Only one of %s or %s can be specified", autoGenerateKey, credentialsFilepathKey)
+		}
+
+		if persistTo != "file" && persistTo != "terraform" {
+			return diag.Errorf("Can not auto-generate credentials if no persistance is defined in %q", persistKey)
+		} else if persistTo == "file" && saveFilepath != "" {
+			return diag.Errorf("%s must be supplied if %s is set to %q", saveFilepathKey, persistKey, "file")
 		}
 
 		accountUsername, accountPassword = toznySDK.AccountUsername, toznySDK.AccountPassword
 
 		if accountUsername == "" {
-			return diag.FromErr(errors.New("Must specify account_username with provider config when auto generating account resource."))
+			return diag.Errorf("must specify %q with provider config when auto generating account resource.", "account_username")
 		}
 
 		if accountPassword == "" {
@@ -447,10 +473,20 @@ func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 
-	err = ioutil.WriteFile(d.Get("client_credentials_save_filepath").(string), clientCredentialsJSONBytes, 0644)
-
-	if err != nil {
-		return diag.FromErr(err)
+	switch persistTo {
+	case "file":
+		err = ioutil.WriteFile(d.Get("client_credentials_save_filepath").(string), clientCredentialsJSONBytes, 0644)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("config", "")
+		break
+	case "terraform":
+		d.Set("config", string(clientCredentialsJSONBytes))
+		break
+	default:
+		d.Set("config", "")
+		break
 	}
 
 	// Associate created account with Terraform state and signal success

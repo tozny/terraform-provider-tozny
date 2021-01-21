@@ -41,10 +41,21 @@ func resourceRealmBrokerIdentity() *schema.Resource {
 				ForceNew:    true,
 			},
 			"client_credentials_filepath": {
-				Description: "The filepath to Tozny client credentials for the provider to use when provisioning this brokering Identity.",
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
+				Description:   "The filepath to Tozny client credentials for the provider to use when provisioning this brokering Identity.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Default:       "",
+				ForceNew:      true,
+				ConflictsWith: []string{"client_credentials_config"},
+			},
+			"client_credentials_config": {
+				Description:   "The Tozny account client configuration as a JSON string",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Default:       "",
+				ForceNew:      true,
+				Sensitive:     true,
+				ConflictsWith: []string{"client_credentials_filepath"},
 			},
 			"identity_client_id": {
 				Description: "Server defined unique identifier for the brokering Identity's client.",
@@ -60,9 +71,7 @@ func resourceRealmBrokerIdentityCreate(ctx context.Context, d *schema.ResourceDa
 	var diags diag.Diagnostics
 	var err error
 
-	toznyClientCredentialsFilePath := d.Get("client_credentials_filepath").(string)
-
-	toznySDK, err := MakeToznySDK(toznyClientCredentialsFilePath, m)
+	toznySDK, err := MakeToznySDK(d, m)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -92,9 +101,9 @@ func resourceRealmBrokerIdentityCreate(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	realmBrokerIdedentityId := registeredBrokerIdentity.Identity.ToznyID.String()
+	realmBrokerIdedentityID := registeredBrokerIdentity.Identity.ToznyID.String()
 
-	d.Set("identity_id", realmBrokerIdedentityId)
+	d.Set("identity_id", realmBrokerIdedentityID)
 
 	registeredBrokerIdentity.Identity.PrivateEncryptionKeys = map[string]string{
 		secretKeys.PrivateEncryptionKey.Type: secretKeys.PrivateEncryptionKey.Material,
@@ -110,7 +119,7 @@ func resourceRealmBrokerIdentityCreate(ctx context.Context, d *schema.ResourceDa
 	}
 
 	// Associate created realm broker identity with Terraform state and signal success
-	d.SetId(realmBrokerIdedentityId)
+	d.SetId(realmBrokerIdedentityID)
 
 	return diags
 }

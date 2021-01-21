@@ -16,10 +16,21 @@ func resourceRealmProvider() *schema.Resource {
 		DeleteContext: resourceRealmProviderDelete,
 		Schema: map[string]*schema.Schema{
 			"client_credentials_filepath": {
-				Description: "The filepath to Tozny client credentials for the Terraform provider to use when provisioning this realm provider.",
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
+				Description:   "The filepath to Tozny client credentials for the Terraform provider to use when provisioning this realm provider.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Default:       "",
+				ForceNew:      true,
+				ConflictsWith: []string{"client_credentials_config"},
+			},
+			"client_credentials_config": {
+				Description:   "The Tozny account client configuration as a JSON string",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Default:       "",
+				ForceNew:      true,
+				Sensitive:     true,
+				ConflictsWith: []string{"client_credentials_filepath"},
 			},
 			"provider_id": {
 				Description: "Service defined unique identifier for the provider.",
@@ -187,9 +198,7 @@ func resourceRealmProviderCreate(ctx context.Context, d *schema.ResourceData, m 
 	var diags diag.Diagnostics
 	var err error
 
-	toznyClientCredentialsFilePath := d.Get("client_credentials_filepath").(string)
-
-	toznySDK, err := MakeToznySDK(toznyClientCredentialsFilePath, m)
+	toznySDK, err := MakeToznySDK(d, m)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -244,9 +253,7 @@ func resourceRealmProviderRead(ctx context.Context, d *schema.ResourceData, m in
 	var diags diag.Diagnostics
 	var err error
 
-	toznyClientCredentialsFilePath := d.Get("client_credentials_filepath").(string)
-
-	toznySDK, err := MakeToznySDK(toznyClientCredentialsFilePath, m)
+	toznySDK, err := MakeToznySDK(d, m)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -265,24 +272,24 @@ func resourceRealmProviderRead(ctx context.Context, d *schema.ResourceData, m in
 
 	// to suppress spurious diffs only update the identity_object_classes if
 	// there is an upstream change
-	configuredIdentitityObjectClasses := fetchIdentityObjectClasses(d)
+	configuredIdentityObjectClasses := fetchIdentityObjectClasses(d)
 
 	actualIdentityObjectClasses := provider.ConnectionSettings.IdentityObjectClasses
 
-	if len(configuredIdentitityObjectClasses) != len(actualIdentityObjectClasses) {
-		configuredIdentitityObjectClasses = actualIdentityObjectClasses
+	if len(configuredIdentityObjectClasses) != len(actualIdentityObjectClasses) {
+		configuredIdentityObjectClasses = actualIdentityObjectClasses
 	}
 
-	for _, configuredIdentitityObjectClass := range configuredIdentitityObjectClasses {
+	for _, configuredIdentityObjectClass := range configuredIdentityObjectClasses {
 		var match bool
 		for _, actualIdentityObjectClass := range actualIdentityObjectClasses {
-			if actualIdentityObjectClass == configuredIdentitityObjectClass {
+			if actualIdentityObjectClass == configuredIdentityObjectClass {
 				match = true
 				break
 			}
 		}
 		if !match {
-			configuredIdentitityObjectClasses = actualIdentityObjectClasses
+			configuredIdentityObjectClasses = actualIdentityObjectClasses
 			break
 		}
 	}
@@ -302,7 +309,7 @@ func resourceRealmProviderRead(ctx context.Context, d *schema.ResourceData, m in
 			"identity_name_attribute": provider.ConnectionSettings.IdentityNameAttribute,
 			"rdn_attribute":           provider.ConnectionSettings.RDNAttribute,
 			"uuid_attribute":          provider.ConnectionSettings.UUIDAttribute,
-			"identity_object_classes": configuredIdentitityObjectClasses,
+			"identity_object_classes": configuredIdentityObjectClasses,
 			"connection_url":          provider.ConnectionSettings.ConnectionURL,
 			"identity_dn":             provider.ConnectionSettings.IdentityDN,
 			"authentication_type":     provider.ConnectionSettings.AuthenticationType,
@@ -323,9 +330,7 @@ func resourceRealmProviderDelete(ctx context.Context, d *schema.ResourceData, m 
 	var diags diag.Diagnostics
 	var err error
 
-	toznyClientCredentialsFilePath := d.Get("client_credentials_filepath").(string)
-
-	toznySDK, err := MakeToznySDK(toznyClientCredentialsFilePath, m)
+	toznySDK, err := MakeToznySDK(d, m)
 
 	if err != nil {
 		return diag.FromErr(err)

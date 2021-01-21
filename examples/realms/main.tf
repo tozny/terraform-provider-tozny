@@ -60,7 +60,7 @@ resource "tozny_client_registration_token" "realm_registration_token" {
 }
 
 # A resource for provisioning a TozID Realm
-# using local filebased credentials for a Tozny Client with permissions to manage Realms.
+# using local file based credentials for a Tozny Client with permissions to manage Realms.
 resource "tozny_realm" "my_organizations_realm" {
   # Block on and use client credentials generated from the provisioned account
   depends_on = [

@@ -16,10 +16,21 @@ func resourceRealmProviderMapper() *schema.Resource {
 		DeleteContext: resourceRealmProviderMapperDelete,
 		Schema: map[string]*schema.Schema{
 			"client_credentials_filepath": {
-				Description: "The filepath to Tozny client credentials for the Terraform provider to use when provisioning this realm provider.",
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
+				Description:   "The filepath to Tozny client credentials for the Terraform provider to use when provisioning this realm provider.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Default:       "",
+				ForceNew:      true,
+				ConflictsWith: []string{"client_credentials_config"},
+			},
+			"client_credentials_config": {
+				Description:   "The Tozny account client configuration as a JSON string",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Default:       "",
+				ForceNew:      true,
+				Sensitive:     true,
+				ConflictsWith: []string{"client_credentials_filepath"},
 			},
 			"provider_id": {
 				Description: "Service defined unique identifier for the provider to associate the mapper with.",
@@ -146,9 +157,7 @@ func resourceRealmProviderMapperCreate(ctx context.Context, d *schema.ResourceDa
 	var diags diag.Diagnostics
 	var err error
 
-	toznyClientCredentialsFilePath := d.Get("client_credentials_filepath").(string)
-
-	toznySDK, err := MakeToznySDK(toznyClientCredentialsFilePath, m)
+	toznySDK, err := MakeToznySDK(d, m)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -195,9 +204,7 @@ func resourceRealmProviderMapperRead(ctx context.Context, d *schema.ResourceData
 	var diags diag.Diagnostics
 	var err error
 
-	toznyClientCredentialsFilePath := d.Get("client_credentials_filepath").(string)
-
-	toznySDK, err := MakeToznySDK(toznyClientCredentialsFilePath, m)
+	toznySDK, err := MakeToznySDK(d, m)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -261,9 +268,7 @@ func resourceRealmProviderMapperDelete(ctx context.Context, d *schema.ResourceDa
 	var diags diag.Diagnostics
 	var err error
 
-	toznyClientCredentialsFilePath := d.Get("client_credentials_filepath").(string)
-
-	toznySDK, err := MakeToznySDK(toznyClientCredentialsFilePath, m)
+	toznySDK, err := MakeToznySDK(d, m)
 
 	if err != nil {
 		return diag.FromErr(err)
