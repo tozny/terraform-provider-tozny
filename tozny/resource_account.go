@@ -342,7 +342,7 @@ func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interf
 
 		if persistTo != "file" && persistTo != "terraform" {
 			return diag.Errorf("Can not auto-generate credentials if no persistance is defined in %q", persistKey)
-		} else if persistTo == "file" && saveFilepath != "" {
+		} else if persistTo == "file" && saveFilepath == "" {
 			return diag.Errorf("%s must be supplied if %s is set to %q", saveFilepathKey, persistKey, "file")
 		}
 

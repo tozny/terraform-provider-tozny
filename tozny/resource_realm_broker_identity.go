@@ -101,9 +101,9 @@ func resourceRealmBrokerIdentityCreate(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	realmBrokerIdedentityID := registeredBrokerIdentity.Identity.ToznyID.String()
+	realmBrokerIdentityID := registeredBrokerIdentity.Identity.ToznyID.String()
 
-	d.Set("identity_id", realmBrokerIdedentityID)
+	d.Set("identity_id", realmBrokerIdentityID)
 
 	registeredBrokerIdentity.Identity.PrivateEncryptionKeys = map[string]string{
 		secretKeys.PrivateEncryptionKey.Type: secretKeys.PrivateEncryptionKey.Material,
@@ -119,7 +119,7 @@ func resourceRealmBrokerIdentityCreate(ctx context.Context, d *schema.ResourceDa
 	}
 
 	// Associate created realm broker identity with Terraform state and signal success
-	d.SetId(realmBrokerIdedentityID)
+	d.SetId(realmBrokerIdentityID)
 
 	return diags
 }
