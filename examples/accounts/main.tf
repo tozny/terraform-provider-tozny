@@ -27,14 +27,14 @@ resource "random_string" "account_username_salt" {
   special = false
 }
 
-# # Generate a random string for use in creating
-# # accounts across environments or executions conflict free
+# Generate a random string for use in creating
+# accounts across environments or executions conflict free
 resource "random_string" "account_email_salt" {
   length = 8
   special = false
 }
 
-# # A resource for provisioning a Tozny account from explicit configuration
+# A resource for provisioning a Tozny account from explicit configuration
 resource "tozny_account" "pregenerated_tozny_account_credentials" {
   client_credentials_save_filepath = "./tozny_client_credentials.json"
   profile {
@@ -63,8 +63,8 @@ resource "tozny_account" "pregenerated_tozny_account_credentials" {
   }
 }
 
-# # A resource for provisioning a Tozny account from explicit configuration read from a local file.
-# # Tied for 1st most secure method in that no private information has to be passed to Terraform
+# A resource for provisioning a Tozny account from explicit configuration read from a local file.
+# Tied for 1st most secure method in that no private information has to be passed to Terraform
 resource "tozny_account" "pregenerated_tozny_account_credentials_from_file" {
   autogenerate_account_credentials = false
   account_credentials_filepath = "account.json"
