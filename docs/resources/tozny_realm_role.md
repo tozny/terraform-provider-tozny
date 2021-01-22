@@ -108,8 +108,8 @@ resource "tozny_realm_role" "admin_role" {
 
 ### Top-Level Arguments
 
-* `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the Terraform provider to use when provisioning this realm identity provider. Omit if using `client_credentials_config`.
-* `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when provisioning this realm identity provider. Omit if using `client_credentials_filepath`.
+* `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the Terraform provider to use when provisioning this resource identity provider. Omit if using `client_credentials_config`.
+* `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when provisioning this resource identity provider. Omit if using `client_credentials_filepath`.
 * `role_role_id` - (Computed) Service defined unique identifier for the role role.
 * `realm_name` - (Required) The name of the realm with which to associate the role role.
 * `name` - (Required) User defined name for the role role.

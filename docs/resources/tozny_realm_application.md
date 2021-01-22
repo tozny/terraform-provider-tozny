@@ -151,8 +151,8 @@ resource "tozny_realm_application" "aws_saml_application" {
 
 ### Top-Level Arguments
 
-* `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the provider to use when provisioning this realm. For this resource either this value or both `account_username` and `account_password` must be set on the provider. Omit if using `client_credentials_config`.
-* `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when provisioning this realm. For this resource either this value or both `account_username` and `account_password` must be set on the provider. Omit if using `client_credentials_filepath`.
+* `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the provider to use when provisioning this resource. For this resource either this value or both `account_username` and `account_password` must be set on the provider. Omit if using `client_credentials_config`.
+* `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when provisioning this resource. For this resource either this value or both `account_username` and `account_password` must be set on the provider. Omit if using `client_credentials_filepath`.
 * `realm_name` - (Required) The name of the Realm to provision the Application for.
 * `client_id` - (Required) The external id for clients to reference when communicating with this application.
 * `application_id` - (Computed) Server defined unique identifier for the Application.

@@ -74,8 +74,8 @@ resource "tozny_client_registration_token" "realm_registration_token" {
 * `allowed_registration_client_types` - (Required) The client types that can be registered using the token. Valid types are `general`, `identity`, and `broker`. Must specify at least one.
 * `enabled` - (Optional) Whether the clients can be registered using this token. Defaults to true.
 * `one_time_use` - (Optional) Whether the token is only valid for registering a single client. Defaults to false.
-* `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the provider to use when provisioning this realm. For this resource either this value or both `account_username` and `account_password` must be set on the provider. Omit if using `client_credentials_config`.
-* `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when provisioning this realm. For this resource either this value or both `account_username` and `account_password` must be set on the provider. Omit if using `client_credentials_filepath`.
+* `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the provider to use when provisioning this resource. For this resource either this value or both `account_username` and `account_password` must be set on the provider. Omit if using `client_credentials_config`.
+* `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when provisioning this resource. For this resource either this value or both `account_username` and `account_password` must be set on the provider. Omit if using `client_credentials_filepath`.
 * `token` - (Computed) Client registration token.
 
 ## Attribute Reference

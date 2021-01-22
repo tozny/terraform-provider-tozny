@@ -139,8 +139,8 @@ data "tozny_realm_application_saml_description" "saml_xml_description" {
 ### Top-Level Arguments
 
 * `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the Terraform provider to use when fetching this application's SAML description. Omit if using `client_credentials_config`.
-* `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use
-* `description` - (Computed) OIDC Client secret for the application.s application's SAML description. Omit if using `client_credentials_filepath`.
+* `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when fetching this application's SAML description. Omit if using `client_credentials_filepath`.
+* `description` - (Computed) The SAML description contents from TozID
 * `application_id` - (Required) The application ID to retrieve the SAML description secret for.
 * `realm_name` - (Required) The name of the realm the application is associated with.
 * `format` - (Required) The format of the description to retrieve. Valid values are `saml-idp-descriptor`, `keycloak-saml`, `saml-sp-descriptor`, and `keycloak-saml-subsystem`.

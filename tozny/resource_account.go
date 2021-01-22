@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/tozny/e3db-clients-go/accountClient"
 	"github.com/tozny/e3db-go/v2"
 )
@@ -17,7 +18,7 @@ import (
 // account credentials suitable for
 // serializing to and from JSON for SDK consumption
 type AccountCredentialsFile struct {
-	APIEndpoint      string `json:"api_url"`
+	APIEndpoint     string `json:"api_url"`
 	AccountUsername string `json:"account_username"`
 	AccountPassword string `json:"account_password"`
 	Account         accountClient.Account
@@ -132,11 +133,12 @@ func resourceAccount() *schema.Resource {
 		DeleteContext: resourceAccountDelete,
 		Schema: map[string]*schema.Schema{
 			"persist_credentials_to": {
-				Description: "Where to persist the generated account credentials. Default: none, they are not persisted.",
-				Type:        schema.TypeString,
-				Default:     "none",
-				Optional:    true,
-				ForceNew:    true,
+				Description:  "Where to persist the generated account credentials. Default: none, they are not persisted.",
+				Type:         schema.TypeString,
+				Default:      "none",
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"none", "file", "terraform"}, false),
 			},
 			"autogenerate_account_credentials": {
 				Description:   "Whether Terraform should generate credentials for a provisioned account.",
@@ -161,7 +163,7 @@ func resourceAccount() *schema.Resource {
 				ForceNew:    true,
 			},
 			"config": {
-				Description: "the client configuration as a JSON string. Only populated with persist_credentails_to is set to 'terraform'",
+				Description: "The client configuration as a JSON string. Only populated when persist_credentails_to is set to 'terraform'",
 				Type:        schema.TypeString,
 				Computed:    true,
 			},
@@ -347,7 +349,7 @@ func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interf
 		accountUsername, accountPassword = toznySDK.AccountUsername, toznySDK.AccountPassword
 
 		if accountUsername == "" {
-			return diag.Errorf("must specify %q with provider config when auto generating account resource.", "account_username")
+			return diag.Errorf("Must specify %q with provider config when auto generating account resource.", "account_username")
 		}
 
 		if accountPassword == "" {

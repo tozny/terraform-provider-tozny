@@ -197,8 +197,8 @@ resource "tozny_realm_application_mapper" "saml_roles_mapper" {
 
 ### Top-Level Arguments
 
-* `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the Terraform provider to use when provisioning this realm provider. Omit if using `client_credentials_config`.
-* `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when provisioning this realm provider. Omit if using `client_credentials_filepath`.
+* `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the Terraform provider to use when provisioning this resource. Omit if using `client_credentials_config`.
+* `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when provisioning this resource. Omit if using `client_credentials_filepath`.
 * `application_mapper_id` - (Computed) Service defined unique identifier for the application mapper.
 * `application_id` - (Required) ID of the Application the Mapper is associated with.
 * `realm_name` - (Required) The name of the Realm to provision the Application Mapper in.
