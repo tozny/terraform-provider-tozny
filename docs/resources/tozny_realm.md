@@ -52,7 +52,7 @@ resource "tozny_client_registration_token" "realm_registration_token" {
 }
 
 # A resource for provisioning a TozID Realm
-# using local filebased credentials for a Tozny Client with permissions to manage Realms.
+# using local file based credentials for a Tozny Client with permissions to manage Realms.
 resource "tozny_realm" "my_organizations_realm" {
   # Block on and use client credentials generated from the provisioned account
   depends_on = [
@@ -103,7 +103,8 @@ resource "tozny_realm_broker_delegation" "allow_tozny_hosted_brokering_policy" {
 * `admin_url` - (Computed) URL for realm administration console.
 * `active` - (Computed) Whether the realm is active for applications and identities to consume.
 * `broker_identity_tozny_id` - (Computed) The Tozny Client ID associated with the Identity used to broker interactions between the realm and it's Identities. Will be empty if no realm broker Identity has been registered.
-* `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the provider to use when provisioning this realm.
+* `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the provider to use when provisioning this realm. Omit if using `client_credentials_config`.
+* `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use  when provisioning this realm. Omit if using `client_credentials_filepath`.
 * `realm_name` - (Required) User defined identifier for the realm.
 * `sovereign_name` - (Required) User defined sovereign identifier.
 * `sovereign` - (Computed) The admin identity for a realm.

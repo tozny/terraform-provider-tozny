@@ -49,10 +49,21 @@ func resourceClientRegistrationToken() *schema.Resource {
 				ForceNew:    true,
 			},
 			"client_credentials_filepath": {
-				Description: "The filepath to Tozny client credentials for the provider to use when provisioning this registration token.",
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
+				Description:   "The filepath to Tozny client credentials for the provider to use when provisioning this registration token.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Default:       "",
+				ForceNew:      true,
+				ConflictsWith: []string{"client_credentials_config"},
+			},
+			"client_credentials_config": {
+				Description:   "The Tozny account client configuration as a JSON string",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Default:       "",
+				ForceNew:      true,
+				Sensitive:     true,
+				ConflictsWith: []string{"client_credentials_filepath"},
 			},
 			"token": {
 				Description: "Client registration token.",
@@ -69,9 +80,7 @@ func resourceClientRegistrationTokenCreate(ctx context.Context, d *schema.Resour
 	var diags diag.Diagnostics
 	var err error
 
-	toznyClientCredentialsFilePath := d.Get("client_credentials_filepath").(string)
-
-	toznySDK, account, err := MakeToznySession(ctx, toznyClientCredentialsFilePath, m)
+	toznySDK, account, err := MakeToznySession(ctx, d, m)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -112,9 +121,7 @@ func resourceClientRegistrationTokenRead(ctx context.Context, d *schema.Resource
 	var diags diag.Diagnostics
 	var err error
 
-	toznyClientCredentialsFilePath := d.Get("client_credentials_filepath").(string)
-
-	toznySDK, account, err := MakeToznySession(ctx, toznyClientCredentialsFilePath, m)
+	toznySDK, account, err := MakeToznySession(ctx, d, m)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -153,9 +160,7 @@ func resourceClientRegistrationTokenDelete(ctx context.Context, d *schema.Resour
 	var diags diag.Diagnostics
 	var err error
 
-	toznyClientCredentialsFilePath := d.Get("client_credentials_filepath").(string)
-
-	toznySDK, account, err := MakeToznySession(ctx, toznyClientCredentialsFilePath, m)
+	toznySDK, account, err := MakeToznySession(ctx, d, m)
 
 	if err != nil {
 		return diag.FromErr(err)

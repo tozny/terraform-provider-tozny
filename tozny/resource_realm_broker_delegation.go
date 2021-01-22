@@ -2,6 +2,7 @@ package tozny
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -18,16 +19,37 @@ func resourceRealmBrokerDelegation() *schema.Resource {
 		DeleteContext: resourceRealmBrokerDelegationDelete,
 		Schema: map[string]*schema.Schema{
 			"realm_broker_identity_credentials_filepath": {
-				Description: "The filepath to load the realm broker identity to delegate access to.",
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
+				Description:   "The filepath to load the realm broker identity to delegate access to.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Default:       "",
+				ForceNew:      true,
+				ConflictsWith: []string{"realm_broker_identity_credentials"},
+			},
+			"realm_broker_identity_credentials": {
+				Description:   "A JSON representation of the realm broker identity to delegate access to.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Default:       "",
+				ForceNew:      true,
+				ConflictsWith: []string{"realm_broker_identity_credentials_filepath"},
 			},
 			"client_credentials_filepath": {
-				Description: "The filepath to Tozny client credentials for the provider to use when provisioning this broker delegation.",
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
+				Description:   "The filepath to Tozny client credentials for the provider to use when provisioning this broker delegation.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Default:       "",
+				ForceNew:      true,
+				ConflictsWith: []string{"client_credentials_config"},
+			},
+			"client_credentials_config": {
+				Description:   "The Tozny account client configuration as a JSON string",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Default:       "",
+				ForceNew:      true,
+				Sensitive:     true,
+				ConflictsWith: []string{"client_credentials_filepath"},
 			},
 			"use_tozny_hosted_broker": {
 				Description: "Whether to delegate realm brokering to the Tozny Hosted Broker. Defaults to true.",
@@ -61,9 +83,7 @@ func resourceRealmBrokerDelegation() *schema.Resource {
 func resourceRealmBrokerDelegationCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	toznyClientCredentialsFilePath := d.Get("client_credentials_filepath").(string)
-
-	toznySDK, err := MakeToznySDK(toznyClientCredentialsFilePath, m)
+	toznySDK, err := MakeToznySDK(d, m)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -71,7 +91,13 @@ func resourceRealmBrokerDelegationCreate(ctx context.Context, d *schema.Resource
 
 	var broker identityClient.Identity
 
-	err = LoadToznyBrokerIdentity(d.Get("realm_broker_identity_credentials_filepath").(string), &broker)
+	credentialsJSON := d.Get("realm_broker_identity_credentials").(string)
+
+	if credentialsJSON == "" {
+		err = LoadToznyBrokerIdentity(d.Get("realm_broker_identity_credentials_filepath").(string), &broker)
+	} else {
+		err = json.Unmarshal([]byte(credentialsJSON), &broker)
+	}
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -144,9 +170,7 @@ func resourceRealmBrokerDelegationCreate(ctx context.Context, d *schema.Resource
 func resourceRealmBrokerDelegationRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	toznyClientCredentialsFilePath := d.Get("client_credentials_filepath").(string)
-
-	toznySDK, err := MakeToznySDK(toznyClientCredentialsFilePath, m)
+	toznySDK, err := MakeToznySDK(d, m)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -171,9 +195,7 @@ func resourceRealmBrokerDelegationRead(ctx context.Context, d *schema.ResourceDa
 func resourceRealmBrokerDelegationDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	toznyClientCredentialsFilePath := d.Get("client_credentials_filepath").(string)
-
-	toznySDK, err := MakeToznySDK(toznyClientCredentialsFilePath, m)
+	toznySDK, err := MakeToznySDK(d, m)
 
 	if err != nil {
 		return diag.FromErr(err)

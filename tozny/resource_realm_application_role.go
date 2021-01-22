@@ -17,10 +17,21 @@ func resourceRealmApplicationRole() *schema.Resource {
 		DeleteContext: resourceRealmApplicationRoleDelete,
 		Schema: map[string]*schema.Schema{
 			"client_credentials_filepath": {
-				Description: "The filepath to Tozny client credentials for the Terraform provider to use when provisioning this realm provider.",
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
+				Description:   "The filepath to Tozny client credentials for the Terraform provider to use when provisioning this realm provider.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Default:       "",
+				ForceNew:      true,
+				ConflictsWith: []string{"client_credentials_config"},
+			},
+			"client_credentials_config": {
+				Description:   "The Tozny account client configuration as a JSON string",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Default:       "",
+				ForceNew:      true,
+				Sensitive:     true,
+				ConflictsWith: []string{"client_credentials_filepath"},
 			},
 			"realm_name": {
 				Description: "The name of the Realm to provision the Application Role for.",
@@ -59,9 +70,7 @@ func resourceRealmApplicationRole() *schema.Resource {
 func resourceRealmApplicationRoleCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	toznyClientCredentialsFilePath := d.Get("client_credentials_filepath").(string)
-
-	toznySDK, err := MakeToznySDK(toznyClientCredentialsFilePath, m)
+	toznySDK, err := MakeToznySDK(d, m)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -93,9 +102,7 @@ func resourceRealmApplicationRoleCreate(ctx context.Context, d *schema.ResourceD
 func resourceRealmApplicationRoleRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	toznyClientCredentialsFilePath := d.Get("client_credentials_filepath").(string)
-
-	toznySDK, err := MakeToznySDK(toznyClientCredentialsFilePath, m)
+	toznySDK, err := MakeToznySDK(d, m)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -120,9 +127,7 @@ func resourceRealmApplicationRoleRead(ctx context.Context, d *schema.ResourceDat
 func resourceRealmApplicationRoleDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	toznyClientCredentialsFilePath := d.Get("client_credentials_filepath").(string)
-
-	toznySDK, err := MakeToznySDK(toznyClientCredentialsFilePath, m)
+	toznySDK, err := MakeToznySDK(d, m)
 
 	if err != nil {
 		return diag.FromErr(err)

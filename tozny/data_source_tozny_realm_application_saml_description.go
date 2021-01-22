@@ -18,10 +18,21 @@ func dataSourceRealmApplicationSAMLDescription() *schema.Resource {
 		ReadContext: dataSourceRealmApplicationSAMLDescriptionRead,
 		Schema: map[string]*schema.Schema{
 			"client_credentials_filepath": {
-				Description: "The filepath to Tozny client credentials for the Terraform provider to use when fetching this application's SAML description.",
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
+				Description:   "The filepath to Tozny client credentials for the Terraform provider to use when fetching this application's SAML description.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Default:       "",
+				ForceNew:      true,
+				ConflictsWith: []string{"client_credentials_config"},
+			},
+			"client_credentials_config": {
+				Description:   "The Tozny account client configuration as a JSON string",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Default:       "",
+				ForceNew:      true,
+				Sensitive:     true,
+				ConflictsWith: []string{"client_credentials_filepath"},
 			},
 			"realm_name": {
 				Description: "The name of the realm the application is associated with.",
@@ -66,8 +77,7 @@ func dataSourceRealmApplicationSAMLDescription() *schema.Resource {
 func dataSourceRealmApplicationSAMLDescriptionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	toznyClientCredentialsFilePath := d.Get("client_credentials_filepath").(string)
-	toznySDK, err := MakeToznySDK(toznyClientCredentialsFilePath, m)
+	toznySDK, err := MakeToznySDK(d, m)
 	if err != nil {
 		return diag.FromErr(err)
 	}

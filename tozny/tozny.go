@@ -6,7 +6,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/tozny/e3db-clients-go"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	e3dbClients "github.com/tozny/e3db-clients-go"
 	"github.com/tozny/e3db-clients-go/identityClient"
 	"github.com/tozny/e3db-go/v2"
 )
@@ -14,10 +15,10 @@ import (
 // MakeToznySession uses Terraform provider and resource configuration to create a Tozny session
 // for communicating to account and client level APIs, returning an SDK and Account session (with API token) and error
 // (if any).
-func MakeToznySession(ctx context.Context, sdkCredentialsFilePath string, terraformProviderConfig interface{}) (*e3db.ToznySDKV3, e3db.Account, error) {
+func MakeToznySession(ctx context.Context, d *schema.ResourceData, terraformProviderConfig interface{}) (*e3db.ToznySDKV3, e3db.Account, error) {
 	var account e3db.Account
 
-	toznySDK, err := MakeToznySDK(sdkCredentialsFilePath, terraformProviderConfig)
+	toznySDK, err := MakeToznySDK(d, terraformProviderConfig)
 
 	if err != nil {
 		return toznySDK, account, err
@@ -34,17 +35,61 @@ func MakeToznySession(ctx context.Context, sdkCredentialsFilePath string, terraf
 
 // MakeToznySDK uses Terraform provider and resource configuration to create a Tozny SDK provider,
 // returning the SDK and error (if any).
-func MakeToznySDK(sdkCredentialsFilePath string, terraformProviderConfig interface{}) (*e3db.ToznySDKV3, error) {
-	fileClientConfigSpecified := sdkCredentialsFilePath != ""
+func MakeToznySDK(d *schema.ResourceData, terraformProviderConfig interface{}) (*e3db.ToznySDKV3, error) {
+	sdkCredentialsFilePath := d.Get("client_credentials_filepath").(string)
+	accountJSON := d.Get("client_credentials_config").(string)
+	configSourceSpecified := sdkCredentialsFilePath != "" || accountJSON != ""
+
 	toznySDK, err := terraformProviderConfig.(TerraformToznySDKResult).SDK, terraformProviderConfig.(TerraformToznySDKResult).Err
-	if err != nil && !fileClientConfigSpecified {
+	if err != nil && !configSourceSpecified {
 		return toznySDK, err
 	}
-	if fileClientConfigSpecified {
-		toznySDK, err = e3db.GetSDKV3(sdkCredentialsFilePath)
 
-		if err != nil {
-			return toznySDK, err
+	if configSourceSpecified {
+		if accountJSON != "" {
+			var config e3db.ToznySDKJSONConfig
+			err = json.Unmarshal([]byte(accountJSON), &config)
+			if err != nil {
+				return toznySDK, err
+			}
+			toznySDK, err = e3db.NewToznySDKV3(e3db.ToznySDKConfig{
+				ClientConfig: e3dbClients.ClientConfig{
+					ClientID:  config.ClientID,
+					APIKey:    config.APIKeyID,
+					APISecret: config.APISecret,
+					Host:      config.APIBaseURL,
+					AuthNHost: config.APIBaseURL,
+					SigningKeys: e3dbClients.SigningKeys{
+						Public: e3dbClients.Key{
+							Type:     e3dbClients.DefaultSigningKeyType,
+							Material: config.PublicSigningKey,
+						},
+						Private: e3dbClients.Key{
+							Type:     e3dbClients.DefaultSigningKeyType,
+							Material: config.PrivateSigningKey,
+						},
+					},
+					EncryptionKeys: e3dbClients.EncryptionKeys{
+						Private: e3dbClients.Key{
+							Material: config.PrivateKey,
+							Type:     e3dbClients.DefaultEncryptionKeyType,
+						},
+						Public: e3dbClients.Key{
+							Material: config.PublicKey,
+							Type:     e3dbClients.DefaultEncryptionKeyType,
+						},
+					},
+				},
+				AccountUsername: config.AccountUsername,
+				AccountPassword: config.AccountPassword,
+				APIEndpoint:     config.APIBaseURL,
+			})
+		} else if sdkCredentialsFilePath != "" {
+			toznySDK, err = e3db.GetSDKV3(sdkCredentialsFilePath)
+
+			if err != nil {
+				return toznySDK, err
+			}
 		}
 	}
 	return toznySDK, nil
