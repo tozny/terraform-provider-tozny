@@ -2,6 +2,7 @@ package tozny
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -18,10 +19,20 @@ func resourceRealmBrokerDelegation() *schema.Resource {
 		DeleteContext: resourceRealmBrokerDelegationDelete,
 		Schema: map[string]*schema.Schema{
 			"realm_broker_identity_credentials_filepath": {
-				Description: "The filepath to load the realm broker identity to delegate access to.",
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
+				Description:   "The filepath to load the realm broker identity to delegate access to.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Default:       "",
+				ForceNew:      true,
+				ConflictsWith: []string{"realm_broker_identity_credentials"},
+			},
+			"realm_broker_identity_credentials": {
+				Description:   "A JSON representation of the realm broker identity to delegate access to.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Default:       "",
+				ForceNew:      true,
+				ConflictsWith: []string{"realm_broker_identity_credentials_filepath"},
 			},
 			"client_credentials_filepath": {
 				Description:   "The filepath to Tozny client credentials for the provider to use when provisioning this broker delegation.",
@@ -80,7 +91,13 @@ func resourceRealmBrokerDelegationCreate(ctx context.Context, d *schema.Resource
 
 	var broker identityClient.Identity
 
-	err = LoadToznyBrokerIdentity(d.Get("realm_broker_identity_credentials_filepath").(string), &broker)
+	credentialsJSON := d.Get("realm_broker_identity_credentials").(string)
+
+	if credentialsJSON == "" {
+		err = LoadToznyBrokerIdentity(d.Get("realm_broker_identity_credentials_filepath").(string), &broker)
+	} else {
+		err = json.Unmarshal([]byte(credentialsJSON), &broker)
+	}
 
 	if err != nil {
 		return diag.FromErr(err)

@@ -98,7 +98,8 @@ resource "tozny_realm_broker_delegation" "allow_tozny_hosted_brokering_policy" {
 
 ### Top-Level Arguments
 
-* `realm_broker_identity_credentials_filepath` - (Required) The filepath to load the realm broker identity to delegate access to.
+* `realm_broker_identity_credentials_filepath` - (Optional) The filepath to load the realm broker identity to delegate access to. Omit if using `realm_broker_identity_credentials`.
+* `realm_broker_identity_credentials` - (Optional) A JSON string containing the realm broker identity to delegate access to. Omit if using `realm_broker_identity_credentials_filepath`.
 * `use_tozny_hosted_broker` - (Optional) Whether to delegate realm brokering to the Tozny Hosted Broker. Defaults to true.
 * `client_id_to_delegate_brokering` - (Required) Client ID to delegate realm brokering to.
 * `delegated_broker_client_id` - (Computed) The ID of the client realm brokering is delegated to.

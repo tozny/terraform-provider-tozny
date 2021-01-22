@@ -2,9 +2,11 @@ package tozny
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/tozny/e3db-clients-go/identityClient"
 )
 
@@ -15,6 +17,14 @@ func resourceRealmBrokerIdentity() *schema.Resource {
 		ReadContext:   resourceRealmBrokerIdentityRead,
 		DeleteContext: resourceRealmBrokerIdentityDelete,
 		Schema: map[string]*schema.Schema{
+			"persist_credentials_to": {
+				Description:  "Where to persist the generated broker identity credentials. Default: file",
+				Type:         schema.TypeString,
+				Default:      "file",
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"file", "terraform"}, false),
+			},
 			"client_registration_token": {
 				Description: "Token to use when registering the Identity's client.",
 				Type:        schema.TypeString,
@@ -37,8 +47,14 @@ func resourceRealmBrokerIdentity() *schema.Resource {
 			"broker_identity_credentials_save_filepath": {
 				Description: "The filepath to persist the provisioned Identities credentials to.",
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
+				Default:     "",
 				ForceNew:    true,
+			},
+			"credentials": {
+				Description: "The client credentials as a JSON string. Only populated when persist_credentails_to is set to 'terraform'",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"client_credentials_filepath": {
 				Description:   "The filepath to Tozny client credentials for the provider to use when provisioning this brokering Identity.",
@@ -78,6 +94,7 @@ func resourceRealmBrokerIdentityCreate(ctx context.Context, d *schema.ResourceDa
 	}
 
 	clientRegistrationToken, realmName := d.Get("client_registration_token").(string), d.Get("realm_name").(string)
+	persistTo := d.Get("persist_credentials_to").(string)
 
 	brokerIdentityConfig := ToznyBrokerIdentityConfig{
 		ClientRegistrationToken: clientRegistrationToken,
@@ -112,10 +129,20 @@ func resourceRealmBrokerIdentityCreate(ctx context.Context, d *schema.ResourceDa
 		secretKeys.PrivateSigningKey.Type: secretKeys.PrivateSigningKey.Material,
 	}
 
-	err = SaveToznyBrokerIdentity(d.Get("broker_identity_credentials_save_filepath").(string), registeredBrokerIdentity.Identity)
+	if persistTo == "file" {
+		err = SaveToznyBrokerIdentity(d.Get("broker_identity_credentials_save_filepath").(string), registeredBrokerIdentity.Identity)
 
-	if err != nil {
-		return diag.FromErr(err)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("credentials", "")
+	} else {
+		clientCredentialsJSONBytes, err := json.Marshal(registeredBrokerIdentity.Identity)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		d.Set("credentials", string(clientCredentialsJSONBytes))
 	}
 
 	// Associate created realm broker identity with Terraform state and signal success
