@@ -203,7 +203,13 @@ func resourceRealmBrokerDelegationDelete(ctx context.Context, d *schema.Resource
 
 	var broker identityClient.Identity
 
-	err = LoadToznyBrokerIdentity(d.Get("realm_broker_identity_credentials_filepath").(string), &broker)
+	credentialsJSON := d.Get("realm_broker_identity_credentials").(string)
+
+	if credentialsJSON == "" {
+		err = LoadToznyBrokerIdentity(d.Get("realm_broker_identity_credentials_filepath").(string), &broker)
+	} else {
+		err = json.Unmarshal([]byte(credentialsJSON), &broker)
+	}
 
 	if err != nil {
 		return diag.FromErr(err)

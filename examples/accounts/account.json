@@ -1,0 +1,29 @@
+{
+  "api_url": "http://platform.local.tozny.com:8000",
+  "account_username": "terraform+example0003@tozny.com",
+  "account_password": "supersecurepassowrd",
+  "profile": {
+    "name": "TozFormed",
+    "email": "terraform+example0003@tozny.com",
+    "auth_salt": "xXp-SXoBEmFA5aU2k50-4g",
+    "signing_key": {
+      "ed25519": "GxESnvi-4wMdH4IKP1cHsI7IfthpzhF2FRVrn0Z3RBY"
+    },
+    "enc_salt": "A8E2O5rzkrL5R3HeV7py6A",
+    "paper_auth_salt": "7FspmhLxmZ15xi_ZJs-e3g",
+    "paper_enc_salt": "0SLzQBQD611ihctI85PdqA",
+    "paper_signing_key": {
+      "ed25519": "HLJ_kTSnKFXfCnh-y0c83Uqq1JVk6RpPRgd-zPaSl6Y"
+    }
+  },
+  "account": {
+    "company": "Terrafirma",
+    "plan": "free0",
+    "public_key": {
+      "curve25519": "WxqO3mYCwSMPH99I2PJpUI_f6CiTvnoEfcjopyXGUnw"
+    },
+    "signing_key": {
+      "ed25519": "CjjbYPY21YGBsDaXRJ-hqv90ohT3kxckRsssXTow9rc"
+    }
+  }
+}

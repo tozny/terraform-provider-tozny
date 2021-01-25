@@ -6,7 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/tozny/e3db-clients-go"
+	e3dbClients "github.com/tozny/e3db-clients-go"
+	"github.com/tozny/e3db-clients-go/accountClient"
 	"github.com/tozny/e3db-go/v2"
 )
 
@@ -134,6 +135,13 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		if err != nil {
 			terraformToznySDKResult.SDK = toznySDK
 			terraformToznySDKResult.Err = err
+			// SDK was generated without a populated account client, populate it
+			var accountClientConfig = e3dbClients.ClientConfig{
+				Host:      toznySDK.APIEndpoint,
+				AuthNHost: toznySDK.APIEndpoint,
+			}
+			registrationClient := accountClient.New(accountClientConfig)
+			toznySDK.E3dbAccountClient = &registrationClient
 			return terraformToznySDKResult, diags
 		}
 		clientConfig := accountConfig.Config
