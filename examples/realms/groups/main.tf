@@ -15,7 +15,7 @@ terraform {
 
 # Include the Tozny Terraform provider
 provider "tozny" {
-  api_endpoint = "https://dev.e3db.com"
+  api_endpoint = "http://platform.local.tozny.com:8000"
   account_username = "test+${random_string.account_username_salt.result}@tozny.com"
 }
 
@@ -58,11 +58,28 @@ resource "tozny_realm" "my_organizations_realm" {
   sovereign_name = "Administrator"
 }
 
-resource "tozny_realm_group" "my_first_group" {
+# resource "tozny_realm_group" "my_first_group" {
+#   depends_on = [
+#     tozny_realm.my_organizations_realm
+#   ]
+#   client_credentials_filepath = local.tozny_client_credentials_filepath
+#   name = "My First Group"
+#   realm_name = tozny_realm.my_organizations_realm.realm_name
+# }
+
+resource "tozny_realm_group" "group_with_attributes" {
   depends_on = [
     tozny_realm.my_organizations_realm
   ]
   client_credentials_filepath = local.tozny_client_credentials_filepath
-  name = "My First Group"
+  name = "Attributes Example"
   realm_name = tozny_realm.my_organizations_realm.realm_name
+  attribute {
+    key = "permission"
+    values = [ "read" ]
+  }
+  attribute {
+    key = "question"
+    values = [ "answer", "42" ]
+  }
 }
