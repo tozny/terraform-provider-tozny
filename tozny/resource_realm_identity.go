@@ -11,12 +11,12 @@ import (
 	"github.com/tozny/e3db-go/v2"
 )
 
-// resourceIdentity returns the schema and methods for configuring Tozny Identities
-func resourceIdentity() *schema.Resource {
+// resourceRealmIdentity returns the schema and methods for configuring Tozny Identities
+func resourceRealmIdentity() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceIdentityCreate,
-		ReadContext:   resourceIdentityRead,
-		DeleteContext: resourceIdentityDelete,
+		CreateContext: resourceRealmIdentityCreate,
+		ReadContext:   resourceRealmIdentityRead,
+		DeleteContext: resourceRealmIdentityDelete,
 		Schema: map[string]*schema.Schema{
 			"client_credentials_filepath": {
 				Description:   "The filepath to Tozny client credentials for the Terraform provider to use when provisioning this realm provider.",
@@ -36,7 +36,7 @@ func resourceIdentity() *schema.Resource {
 				ConflictsWith: []string{"client_credentials_filepath"},
 			},
 			"realm_name": {
-				Description: "The name of the Realm to provision the group for.",
+				Description: "The name of the Realm to provision the identity for.",
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
@@ -70,6 +70,7 @@ func resourceIdentity() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
+				Sensitive:   true,
 			},
 			"first_name": {
 				Description: "The first name associated with this identity",
@@ -94,7 +95,7 @@ func resourceIdentity() *schema.Resource {
 	}
 }
 
-func resourceIdentityCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceRealmIdentityCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	toznySDK, err := MakeToznySDK(d, m)
@@ -127,13 +128,13 @@ func resourceIdentityCreate(ctx context.Context, d *schema.ResourceData, m inter
 	return diags
 }
 
-func resourceIdentityRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceRealmIdentityRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	// There is nothing to really update for an identity at this time, so implement as a noop.
 	return diags
 }
 
-func resourceIdentityDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceRealmIdentityDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	toznySDK, err := MakeToznySDK(d, m)

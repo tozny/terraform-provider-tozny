@@ -36,7 +36,7 @@ func resourceIdentityGroupMembership() *schema.Resource {
 				ConflictsWith: []string{"client_credentials_filepath"},
 			},
 			"realm_name": {
-				Description: "The name of the Realm to provision the group for.",
+				Description: "The name of the Realm to the identity is a part of.",
 				Type:        schema.TypeString,
 				Required:    true,
 			},
@@ -47,7 +47,7 @@ func resourceIdentityGroupMembership() *schema.Resource {
 				ForceNew:    true,
 			},
 			"group_ids": {
-				Description: "The IDs of the groups to make default for all users in the realm",
+				Description: "A list of the service defined unique identifiers for the groups the identity should get joined to",
 				Type:        schema.TypeList,
 				Required:    true,
 				Elem: &schema.Schema{
@@ -68,7 +68,7 @@ func resourceIdentityGroupMembershipCreateOrUpdate(ctx context.Context, d *schem
 
 	realmName := strings.ToLower(d.Get("realm_name").(string))
 	identityID := strings.ToLower(d.Get("identity_id").(string))
-	groupList := schemaToStringSlice(d.Get("group_ids").([]interface{}))
+	groupList := SchemaToStringSlice(d.Get("group_ids").([]interface{}))
 	err = toznySDK.UpdateGroupMembership(ctx, identityClient.UpdateIdentityGroupMembershipRequest{
 		RealmName:  realmName,
 		IdentityID: identityID,
@@ -95,7 +95,7 @@ func resourceIdentityGroupMembershipRead(ctx context.Context, d *schema.Resource
 	realmName := strings.ToLower(d.Get("realm_name").(string))
 	identityID := strings.ToLower(d.Get("identity_id").(string))
 	storedGroupList, _ := d.GetChange("group_ids")
-	groupList := schemaToStringSlice(storedGroupList.([]interface{}))
+	groupList := SchemaToStringSlice(storedGroupList.([]interface{}))
 	serverGroups, err := toznySDK.GroupMembership(ctx, identityClient.RealmIdentityRequest{
 		RealmName:  realmName,
 		IdentityID: identityID,
@@ -103,7 +103,7 @@ func resourceIdentityGroupMembershipRead(ctx context.Context, d *schema.Resource
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	// Use a map-set to read through groups in state-order using false to indicated
+	// Use a map-set to read through groups in state-order using false to indicate
 	// they have not been seen yet from the server state
 	groupMapSet := map[string]bool{}
 	for _, groupID := range groupList {
@@ -114,7 +114,7 @@ func resourceIdentityGroupMembershipRead(ctx context.Context, d *schema.Resource
 		groupMapSet[group.ID] = true
 	}
 
-	// translate group list back into terraform state format
+	// Translate group list back into terraform state format
 	updatedIDs := []interface{}{}
 	for groupID, found := range groupMapSet {
 		// found indicates this was seen in the server fetched data

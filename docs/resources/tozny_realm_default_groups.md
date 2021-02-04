@@ -6,21 +6,6 @@ This resource requires that the account username and password be supplied to the
 
 ## Example Usage
 ```hcl
-# Configure the Terraform runtime
-terraform {
-  required_version = ">= 0.13"
-  required_providers {
-    tozny = {
-      # Pull signed provider binaries from
-      # the Terraform hosted registry namespace
-      # for Tozny registry.terraform.io/tozny
-      source  = "tozny/tozny"
-      # Pin Tozny provider version
-      version = ">=0.10.1"
-    }
-  }
-}
-
 # Include the Tozny Terraform provider
 provider "tozny" {
   api_endpoint = "http://platform.local.tozny.com:8000"
@@ -103,7 +88,7 @@ resource "tozny_realm_default_groups" "default_groups" {
 
 * `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the Terraform provider to use when setting default groups. Omit if using `client_credentials_config`.
 * `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when setting default groups. Omit if using `client_credentials_filepath`.
-* `realm_name` - (Required) The name of the realm with which to associate the group.
+* `realm_name` - (Required) The name of the realm with which to associate the group as a default.
 * `group_ids` - (Required) A list of the service defined unique identifier for the groups which should get made default.
 
 ## Attribute Reference

@@ -6,8 +6,6 @@ This resource requires that the account username and password be supplied to the
 
 ## Example Usage
 ```hcl
-
-
 # Include the Tozny Terraform provider
 provider "tozny" {
   api_endpoint = "http://platform.local.tozny.com:8000"

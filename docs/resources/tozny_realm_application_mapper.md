@@ -6,21 +6,6 @@ This resource requires that the account username and password be supplied to the
 
 ## Example Usage
 ```hcl
-# Configure the Terraform runtime
-terraform {
-  required_version = ">= 0.13"
-  required_providers {
-    tozny = {
-      # Pull signed provider binaries from
-      # the Terraform hosted registry namespace
-      # for Tozny registry.terraform.io/tozny
-      source  = "tozny/tozny"
-      # Pin Tozny provider version
-      version = ">=0.10.1"
-    }
-  }
-}
-
 # Include the Tozny Terraform provider
 provider "tozny" {
   api_endpoint = "http://platform.local.tozny.com:8000"
@@ -178,7 +163,7 @@ resource "tozny_realm_application_mapper" "oidc_client_policy_mapper" {
 }
 
 # A resource for creating an application oidc mapper for identity group membership
-resource "tozny_realm_application_mapper" "oidc_group_memebership_mapper" {
+resource "tozny_realm_application_mapper" "oidc_group_membership_mapper" {
   depends_on = [
     tozny_realm_application.aws_saml_application
   ]

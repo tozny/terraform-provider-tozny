@@ -36,7 +36,7 @@ func resourceRealmDefaultGroups() *schema.Resource {
 				ConflictsWith: []string{"client_credentials_filepath"},
 			},
 			"realm_name": {
-				Description: "The name of the Realm to provision the group for.",
+				Description: "The name of the realm with which to associate the group as a default.",
 				Type:        schema.TypeString,
 				Required:    true,
 			},
@@ -61,7 +61,7 @@ func resourceRealmDefaultGroupsCreateOrUpdate(ctx context.Context, d *schema.Res
 	}
 
 	realmName := strings.ToLower(d.Get("realm_name").(string))
-	groupList := schemaToStringSlice(d.Get("group_ids").([]interface{}))
+	groupList := SchemaToStringSlice(d.Get("group_ids").([]interface{}))
 	err = toznySDK.ReplaceRealmDefaultGroups(ctx, identityClient.UpdateGroupListRequest{
 		RealmName: realmName,
 		Groups:    groupList,
@@ -86,7 +86,7 @@ func resourceRealmDefaultGroupsRead(ctx context.Context, d *schema.ResourceData,
 
 	realmName := strings.ToLower(d.Get("realm_name").(string))
 	storedGroupList, _ := d.GetChange("group_ids")
-	groupList := schemaToStringSlice(storedGroupList.([]interface{}))
+	groupList := SchemaToStringSlice(storedGroupList.([]interface{}))
 	serverGroups, err := toznySDK.ListRealmDefaultGroups(ctx, identityClient.ListRealmGroupsRequest{
 		RealmName: realmName,
 	})
@@ -140,12 +140,4 @@ func resourceRealmDefaultGroupsDelete(ctx context.Context, d *schema.ResourceDat
 	d.SetId("")
 
 	return diags
-}
-
-func schemaToStringSlice(schemaList []interface{}) []string {
-	groupList := []string{}
-	for _, groupID := range schemaList {
-		groupList = append(groupList, groupID.(string))
-	}
-	return groupList
 }
