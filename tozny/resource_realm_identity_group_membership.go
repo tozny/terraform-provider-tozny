@@ -2,7 +2,6 @@ package tozny
 
 import (
 	"context"
-	"strings"
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -10,13 +9,13 @@ import (
 	"github.com/tozny/e3db-clients-go/identityClient"
 )
 
-// resourceIdentityGroupMembership returns the schema and methods for configuring Tozny Realm default groups
-func resourceIdentityGroupMembership() *schema.Resource {
+// resourceRealmIdentityGroupMembership returns the schema and methods for configuring Tozny Realm default groups
+func resourceRealmIdentityGroupMembership() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceIdentityGroupMembershipCreateOrUpdate,
-		ReadContext:   resourceIdentityGroupMembershipRead,
-		DeleteContext: resourceIdentityGroupMembershipDelete,
-		UpdateContext: resourceIdentityGroupMembershipCreateOrUpdate,
+		CreateContext: resourceRealmIdentityGroupMembershipCreateOrUpdate,
+		ReadContext:   resourceRealmIdentityGroupMembershipRead,
+		DeleteContext: resourceRealmIdentityGroupMembershipDelete,
+		UpdateContext: resourceRealmIdentityGroupMembershipCreateOrUpdate,
 		Schema: map[string]*schema.Schema{
 			"client_credentials_filepath": {
 				Description:   "The filepath to Tozny client credentials for the Terraform provider to use when provisioning this realm provider.",
@@ -58,7 +57,7 @@ func resourceIdentityGroupMembership() *schema.Resource {
 	}
 }
 
-func resourceIdentityGroupMembershipCreateOrUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceRealmIdentityGroupMembershipCreateOrUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	toznySDK, err := MakeToznySDK(d, m)
@@ -66,8 +65,8 @@ func resourceIdentityGroupMembershipCreateOrUpdate(ctx context.Context, d *schem
 		return diag.FromErr(err)
 	}
 
-	realmName := strings.ToLower(d.Get("realm_name").(string))
-	identityID := strings.ToLower(d.Get("identity_id").(string))
+	realmName := d.Get("realm_name").(string)
+	identityID := d.Get("identity_id").(string)
 	groupList := SchemaToStringSlice(d.Get("group_ids").([]interface{}))
 	err = toznySDK.UpdateGroupMembership(ctx, identityClient.UpdateIdentityGroupMembershipRequest{
 		RealmName:  realmName,
@@ -84,7 +83,7 @@ func resourceIdentityGroupMembershipCreateOrUpdate(ctx context.Context, d *schem
 	return diags
 }
 
-func resourceIdentityGroupMembershipRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceRealmIdentityGroupMembershipRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	toznySDK, err := MakeToznySDK(d, m)
@@ -92,8 +91,8 @@ func resourceIdentityGroupMembershipRead(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	realmName := strings.ToLower(d.Get("realm_name").(string))
-	identityID := strings.ToLower(d.Get("identity_id").(string))
+	realmName := d.Get("realm_name").(string)
+	identityID := d.Get("identity_id").(string)
 	storedGroupList, _ := d.GetChange("group_ids")
 	groupList := SchemaToStringSlice(storedGroupList.([]interface{}))
 	serverGroups, err := toznySDK.GroupMembership(ctx, identityClient.RealmIdentityRequest{
@@ -129,7 +128,7 @@ func resourceIdentityGroupMembershipRead(ctx context.Context, d *schema.Resource
 	return diags
 }
 
-func resourceIdentityGroupMembershipDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceRealmIdentityGroupMembershipDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	toznySDK, err := MakeToznySDK(d, m)
@@ -137,8 +136,8 @@ func resourceIdentityGroupMembershipDelete(ctx context.Context, d *schema.Resour
 		return diag.FromErr(err)
 	}
 
-	realmName := strings.ToLower(d.Get("realm_name").(string))
-	identityID := strings.ToLower(d.Get("identity_id").(string))
+	realmName := d.Get("realm_name").(string)
+	identityID := d.Get("identity_id").(string)
 
 	err = toznySDK.UpdateGroupMembership(ctx, identityClient.UpdateIdentityGroupMembershipRequest{
 		RealmName:  realmName,

@@ -3,7 +3,6 @@ package tozny
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -142,7 +141,7 @@ func resourceRealmIdentityDelete(ctx context.Context, d *schema.ResourceData, m 
 		return diag.FromErr(err)
 	}
 
-	realmName := strings.ToLower(d.Get("realm_name").(string))
+	realmName := d.Get("realm_name").(string)
 
 	err = toznySDK.DeleteIdentity(context.Background(), identityClient.RealmIdentityRequest{
 		RealmName:  realmName,

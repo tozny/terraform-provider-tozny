@@ -2,7 +2,6 @@ package tozny
 
 import (
 	"context"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -196,7 +195,7 @@ func resourceRealmApplicationMapperCreate(ctx context.Context, d *schema.Resourc
 	}
 
 	createApplicationMapperParams := identityClient.CreateRealmApplicationMapperRequest{
-		RealmName:     strings.ToLower(d.Get("realm_name").(string)),
+		RealmName:     d.Get("realm_name").(string),
 		ApplicationID: d.Get("application_id").(string),
 		ApplicationMapper: identityClient.ApplicationMapper{
 			Name:                     d.Get("name").(string),
@@ -241,7 +240,7 @@ func resourceRealmApplicationMapperRead(ctx context.Context, d *schema.ResourceD
 	}
 
 	applicationMapper, err := toznySDK.DescribeRealmApplicationMapper(ctx, identityClient.DescribeRealmApplicationMapperRequest{
-		RealmName:           strings.ToLower(d.Get("realm_name").(string)),
+		RealmName:           d.Get("realm_name").(string),
 		ApplicationID:       d.Get("application_id").(string),
 		ApplicationMapperID: d.Get("application_mapper_id").(string),
 	})
@@ -280,7 +279,7 @@ func resourceRealmApplicationMapperDelete(ctx context.Context, d *schema.Resourc
 	}
 
 	err = toznySDK.DeleteRealmApplicationMapper(ctx, identityClient.DeleteRealmApplicationMapperRequest{
-		RealmName:           strings.ToLower(d.Get("realm_name").(string)),
+		RealmName:           d.Get("realm_name").(string),
 		ApplicationID:       d.Get("application_id").(string),
 		ApplicationMapperID: d.Get("application_mapper_id").(string),
 	})

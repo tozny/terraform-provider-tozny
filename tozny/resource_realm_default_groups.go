@@ -2,7 +2,6 @@ package tozny
 
 import (
 	"context"
-	"strings"
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -60,7 +59,7 @@ func resourceRealmDefaultGroupsCreateOrUpdate(ctx context.Context, d *schema.Res
 		return diag.FromErr(err)
 	}
 
-	realmName := strings.ToLower(d.Get("realm_name").(string))
+	realmName := d.Get("realm_name").(string)
 	groupList := SchemaToStringSlice(d.Get("group_ids").([]interface{}))
 	err = toznySDK.ReplaceRealmDefaultGroups(ctx, identityClient.UpdateGroupListRequest{
 		RealmName: realmName,
@@ -84,7 +83,7 @@ func resourceRealmDefaultGroupsRead(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	realmName := strings.ToLower(d.Get("realm_name").(string))
+	realmName := d.Get("realm_name").(string)
 	storedGroupList, _ := d.GetChange("group_ids")
 	groupList := SchemaToStringSlice(storedGroupList.([]interface{}))
 	serverGroups, err := toznySDK.ListRealmDefaultGroups(ctx, identityClient.ListRealmGroupsRequest{
@@ -127,7 +126,7 @@ func resourceRealmDefaultGroupsDelete(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	realmName := strings.ToLower(d.Get("realm_name").(string))
+	realmName := d.Get("realm_name").(string)
 
 	err = toznySDK.ReplaceRealmDefaultGroups(ctx, identityClient.UpdateGroupListRequest{
 		RealmName: realmName,
