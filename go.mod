@@ -10,3 +10,4 @@ require (
 )
 
 replace github.com/tozny/e3db-clients-go => /Users/lkwdwrd/Documents/Projects/Tozny/e3db-clients-go
+replace github.com/tozny/e3db-go/v2 => /Users/lkwdwrd/Documents/Projects/Tozny/e3db-go

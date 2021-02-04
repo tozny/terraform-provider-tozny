@@ -15,7 +15,7 @@ terraform {
 
 # Include the Tozny Terraform provider
 provider "tozny" {
-  api_endpoint = "https://dev.e3db.com"
+  api_endpoint = "http://platform.local.tozny.com:8000"
   account_username = "test+${random_string.account_username_salt.result}@tozny.com"
 }
 
@@ -114,6 +114,7 @@ resource "tozny_realm_application" "jenkins_oidc_application" {
   active = true
   protocol = "openid-connect"
   oidc_settings {
+    allowed_origins = [ "https://example.frontend.com" ]
     root_url = "https://jenkins.acme.com"
   }
 }
@@ -161,9 +162,30 @@ resource "tozny_realm_application_mapper" "oidc_client_policy_mapper" {
   add_to_user_info = true
   add_to_id_token = true
   add_to_access_token = true
+  multivalued = false
+  aggregate_attribute_values = false
   user_attribute = "policy"
   claim_json_type = "String"
   token_claim_name = "policy"
+}
+
+# A resource for creating an application oidc mapper for identity group membership
+resource "tozny_realm_application_mapper" "oidc_group_memebership_mapper" {
+  depends_on = [
+    tozny_realm_application.aws_saml_application
+  ]
+  client_credentials_filepath = local.tozny_client_credentials_filepath
+  realm_name = tozny_realm.my_organizations_realm.realm_name
+  application_id = tozny_realm_application.jenkins_oidc_application.application_id
+  name = "group-membership"
+  protocol = "openid-connect"
+  mapper_type = "oidc-group-membership-mapper"
+  add_to_user_info = true
+  add_to_id_token = true
+  add_to_access_token = true
+  claim_json_type = "String"
+  token_claim_name = "group-membership"
+  full_group_path = true
 }
 
 # A resource for creating an application saml mapper for identity name attribute
