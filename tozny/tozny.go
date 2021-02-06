@@ -172,3 +172,13 @@ func LoadToznyBrokerIdentity(filepath string, broker *identityClient.Identity) e
 
 	return nil
 }
+
+// SchemaToStringSlice translate a slice of strings pulled read from a schema,
+// which is a slice of interfaces, into a slice fo strings for processing and use.
+func SchemaToStringSlice(schemaList []interface{}) []string {
+	groupList := []string{}
+	for _, groupID := range schemaList {
+		groupList = append(groupList, groupID.(string))
+	}
+	return groupList
+}

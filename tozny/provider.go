@@ -54,9 +54,12 @@ func Provider() *schema.Provider {
 			"tozny_realm_application_client_secret": resourceRealmApplicationClientSecret(),
 			"tozny_realm_application_role":          resourceRealmApplicationRole(),
 			"tozny_realm_group":                     resourceRealmGroup(),
+			"tozny_realm_default_groups":            resourceRealmDefaultGroups(),
 			"tozny_realm_group_role_mappings":       resourceRealmGroupRoleMappings(),
 			"tozny_realm_provider":                  resourceRealmProvider(),
 			"tozny_realm_provider_mapper":           resourceRealmProviderMapper(),
+			"tozny_realm_identity":                  resourceRealmIdentity(),
+			"tozny_realm_identity_group_membership": resourceRealmIdentityGroupMembership(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"tozny_realm_application_saml_description": dataSourceRealmApplicationSAMLDescription(),

@@ -2,7 +2,6 @@ package tozny
 
 import (
 	"context"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -60,11 +59,17 @@ func resourceRealmApplicationMapper() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{identityClient.ProtocolSAML, identityClient.ProtocolOIDC}, false),
 			},
 			"mapper_type": {
-				Description:  "The category of data this mapper is applied to. Valid values are `oidc-user-session-note-mapper`, `oidc-user-attribute-mapper`, `saml-role-list-mapper`, `saml-user-property-mapper`.",
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{identityClient.UserSessionNoteOIDCApplicationMapperType, identityClient.UserAttributeOIDCApplicationMapperType, identityClient.RoleListSAMLApplicationMapperType, identityClient.UserPropertySAMLApplicationMapperType}, false),
+				Description: "The category of data this mapper is applied to. Valid values are `oidc-user-session-note-mapper`, `oidc-user-attribute-mapper`, `oidc-group-membership-mapper`, `saml-role-list-mapper`, `saml-user-property-mapper`.",
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				ValidateFunc: validation.StringInSlice([]string{
+					identityClient.UserSessionNoteOIDCApplicationMapperType,
+					identityClient.UserAttributeOIDCApplicationMapperType,
+					identityClient.RoleListSAMLApplicationMapperType,
+					identityClient.UserPropertySAMLApplicationMapperType,
+					identityClient.GroupMembershipOIDCApplicationMapperType,
+				}, false),
 			},
 			"user_session_note": {
 				Description: "Name of stored user session note within the UserSessionModel.note map.",
@@ -170,6 +175,13 @@ func resourceRealmApplicationMapper() *schema.Resource {
 				Computed:    true,
 				ForceNew:    true,
 			},
+			"full_group_path": {
+				Description: "If true, will include the full group path in tokens when the group-mapper is created.",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				ForceNew:    true,
+				Default:     false,
+			},
 		},
 	}
 }
@@ -183,7 +195,7 @@ func resourceRealmApplicationMapperCreate(ctx context.Context, d *schema.Resourc
 	}
 
 	createApplicationMapperParams := identityClient.CreateRealmApplicationMapperRequest{
-		RealmName:     strings.ToLower(d.Get("realm_name").(string)),
+		RealmName:     d.Get("realm_name").(string),
 		ApplicationID: d.Get("application_id").(string),
 		ApplicationMapper: identityClient.ApplicationMapper{
 			Name:                     d.Get("name").(string),
@@ -191,6 +203,7 @@ func resourceRealmApplicationMapperCreate(ctx context.Context, d *schema.Resourc
 			MapperType:               d.Get("mapper_type").(string),
 			UserSessionNote:          d.Get("user_session_note").(string),
 			UserAttribute:            d.Get("user_attribute").(string),
+			FullPath:                 d.Get("full_group_path").(bool),
 			TokenClaimName:           d.Get("token_claim_name").(string),
 			ClaimJSONType:            d.Get("claim_json_type").(string),
 			AddToIDToken:             d.Get("add_to_id_token").(bool),
@@ -227,7 +240,7 @@ func resourceRealmApplicationMapperRead(ctx context.Context, d *schema.ResourceD
 	}
 
 	applicationMapper, err := toznySDK.DescribeRealmApplicationMapper(ctx, identityClient.DescribeRealmApplicationMapperRequest{
-		RealmName:           strings.ToLower(d.Get("realm_name").(string)),
+		RealmName:           d.Get("realm_name").(string),
 		ApplicationID:       d.Get("application_id").(string),
 		ApplicationMapperID: d.Get("application_mapper_id").(string),
 	})
@@ -239,6 +252,7 @@ func resourceRealmApplicationMapperRead(ctx context.Context, d *schema.ResourceD
 	d.Set("mapper_type", applicationMapper.MapperType)
 	d.Set("user_session_note", applicationMapper.UserSessionNote)
 	d.Set("user_attribute", applicationMapper.UserAttribute)
+	d.Set("full_group_path", applicationMapper.FullPath)
 	d.Set("token_claim_name", applicationMapper.TokenClaimName)
 	d.Set("claim_json_type", applicationMapper.ClaimJSONType)
 	d.Set("add_to_id_token", applicationMapper.AddToIDToken)
@@ -265,7 +279,7 @@ func resourceRealmApplicationMapperDelete(ctx context.Context, d *schema.Resourc
 	}
 
 	err = toznySDK.DeleteRealmApplicationMapper(ctx, identityClient.DeleteRealmApplicationMapperRequest{
-		RealmName:           strings.ToLower(d.Get("realm_name").(string)),
+		RealmName:           d.Get("realm_name").(string),
 		ApplicationID:       d.Get("application_id").(string),
 		ApplicationMapperID: d.Get("application_mapper_id").(string),
 	})
