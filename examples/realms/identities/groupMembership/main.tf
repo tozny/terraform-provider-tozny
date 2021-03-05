@@ -127,7 +127,7 @@ resource "tozny_realm_group" "realm_admin_group" {
   realm_name = tozny_realm.my_organizations_realm.realm_name
 }
 
-# A data provider for fetcthing data about non-terraform managed applications (e.g. built-in applications)
+# A data provider for fetching data about non-terraform managed applications (e.g. built-in applications)
 data "tozny_realm_application" "realm_management_application" {
   # Block on and use client credentials generated from the provisioned account
   depends_on = [
