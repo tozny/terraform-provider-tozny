@@ -8,7 +8,7 @@ terraform {
       # for Tozny registry.terraform.io/tozny
       source  = "tozny/tozny"
       # Pin Tozny provider version
-      version = ">=0.11.0"
+      version = ">=0.11.1"
     }
   }
 }
@@ -109,4 +109,14 @@ resource "tozny_realm_role" "admin_role" {
   name = "Admin Role"
   description = "Allow all."
   realm_name = tozny_realm.my_organizations_realm.realm_name
+}
+
+# A data provider for fetching data about non-terraform-managed realm roles (e.g. built-in realm roles)
+data "tozny_realm_role" "realm_offline_access_role" {
+  depends_on = [
+    tozny_realm.my_organizations_realm,
+  ]
+  client_credentials_filepath = local.tozny_client_credentials_filepath
+  realm_name = tozny_realm.my_organizations_realm.realm_name
+  name = "offline_access"
 }
