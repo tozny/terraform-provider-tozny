@@ -159,6 +159,7 @@ data "tozny_realm_role" "realm_offline_access_role" {
   name = "offline_access"
 }
 
+# A resource mapping the realm-admin and offline access roles to the realm admin group
 resource "tozny_realm_group_role_mappings" "admin_members_role_mappings" {
   depends_on = [
     tozny_realm_group.realm_admin_group,
