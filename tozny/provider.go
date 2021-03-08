@@ -62,7 +62,10 @@ func Provider() *schema.Provider {
 			"tozny_realm_identity_group_membership": resourceRealmIdentityGroupMembership(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
+			"tozny_realm_application":                  dataSourceRealmApplication(),
+			"tozny_realm_application_role":             dataSourceRealmApplicationRole(),
 			"tozny_realm_application_saml_description": dataSourceRealmApplicationSAMLDescription(),
+			"tozny_realm_role":                         dataSourceRealmRole(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
