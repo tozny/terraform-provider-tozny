@@ -57,9 +57,9 @@ func dataSourceRealmApplicationRole() *schema.Resource {
 			},
 			"composite": {
 				Description: "Whether this role is made of a combination of other roles.",
-				Type: schema.TypeBool,
-				Computed: true,
-				ForceNew: true,
+				Type:        schema.TypeBool,
+				Computed:    true,
+				ForceNew:    true,
 			},
 			"application_role_id": {
 				Description: "Server defined unique identifier for the Application role.",
