@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	e3dbClients "github.com/tozny/e3db-clients-go"
 	"github.com/tozny/e3db-clients-go/accountClient"
 	"github.com/tozny/e3db-go/v2"
 )
@@ -356,7 +357,7 @@ func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interf
 			accountPassword = uuid.New().String()
 		}
 
-		createdAccount, err := toznySDK.Register(ctx, accountUsername, accountUsername, accountPassword)
+		createdAccount, err := toznySDK.Register(ctx, accountUsername, accountUsername, accountPassword, apiEndpoint)
 
 		if err != nil {
 			return diag.FromErr(err)
@@ -506,10 +507,135 @@ func resourceAccountRead(ctx context.Context, d *schema.ResourceData, m interfac
 
 func resourceAccountDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
-	// While 'real Gs' / Tozny accounts never die nor can they be deleted from the API,
-	// at least we can remove them from Terraform state ;-)
-	// d.SetId("") is automatically called assuming delete returns no errors, but
-	// it is added here for explicitness.
+	var toznySDK *e3db.ToznySDKV3
+	var err error
+	var deleteAccountParams accountClient.DeleteAccountRequestData
+
+	accountID := uuid.MustParse(d.Id())
+
+	persistKey := "persist_credentials_to"
+	persistTo := d.Get(persistKey).(string)
+
+	saveFilepathKey := "client_credentials_save_filepath"
+	saveFilepath := d.Get(saveFilepathKey).(string)
+	switch persistTo {
+	case "file":
+		toznySDK, err = e3db.GetSDKV3(saveFilepath)
+		if err != nil {
+			return diag.Errorf("Credentials not found %+v", err)
+		}
+		break
+	case "terraform":
+		var config e3db.ToznySDKJSONConfig
+		configBytes := d.Get("config").(string)
+		err = json.Unmarshal([]byte(configBytes), &config)
+		if err != nil {
+			return diag.Errorf("Failed to unmarshal %+v", err)
+		}
+		sdkConfig := e3db.ToznySDKConfig{
+			ClientConfig: e3dbClients.ClientConfig{
+				ClientID:  config.ClientID,
+				APIKey:    config.APIKeyID,
+				APISecret: config.APISecret,
+				Host:      config.APIBaseURL,
+				AuthNHost: config.APIBaseURL,
+				SigningKeys: e3dbClients.SigningKeys{
+					Public: e3dbClients.Key{
+						Type:     e3dbClients.DefaultSigningKeyType,
+						Material: config.PublicSigningKey,
+					},
+					Private: e3dbClients.Key{
+						Type:     e3dbClients.DefaultSigningKeyType,
+						Material: config.PrivateSigningKey,
+					},
+				},
+				EncryptionKeys: e3dbClients.EncryptionKeys{
+					Private: e3dbClients.Key{
+						Material: config.PrivateKey,
+						Type:     e3dbClients.DefaultEncryptionKeyType,
+					},
+					Public: e3dbClients.Key{
+						Material: config.PublicKey,
+						Type:     e3dbClients.DefaultEncryptionKeyType,
+					},
+				},
+			},
+			AccountUsername: config.AccountUsername,
+			AccountPassword: config.AccountPassword,
+			APIEndpoint:     config.APIBaseURL,
+		}
+		toznySDK, err = e3db.NewToznySDKV3(sdkConfig)
+		if err != nil {
+			return diag.Errorf(" SDK creation Failed %+v", err)
+		}
+		break
+	case "none":
+		toznySDK = m.(TerraformToznySDKResult).SDK
+		if toznySDK.AccountPassword == "" {
+			return diag.Errorf("Password must be set")
+		}
+		if toznySDK.AccountUsername == "" {
+			return diag.Errorf("Username must be set")
+		}
+		var accountConfig e3db.Account
+		accountConfig, err = toznySDK.Login(ctx, toznySDK.AccountUsername, toznySDK.AccountPassword, "password", toznySDK.APIEndpoint)
+		// Don't abort on error as valid provider config is optional or not desired for all resource use cases
+		if err != nil {
+			return diag.Errorf("Account Login Failed %+v", err)
+		}
+		clientConfig := accountConfig.Config
+		// seed sdk config with client credentials
+		sdkConfig := e3db.ToznySDKConfig{
+			ClientConfig: e3dbClients.ClientConfig{
+				ClientID:  clientConfig.ClientID,
+				APIKey:    clientConfig.APIKeyID,
+				APISecret: clientConfig.APISecret,
+				Host:      clientConfig.APIURL,
+				AuthNHost: clientConfig.APIURL,
+				SigningKeys: e3dbClients.SigningKeys{
+					Public: e3dbClients.Key{
+						Type:     e3dbClients.DefaultSigningKeyType,
+						Material: clientConfig.PublicSigningKey,
+					},
+					Private: e3dbClients.Key{
+						Type:     e3dbClients.DefaultSigningKeyType,
+						Material: clientConfig.PrivateSigningKey,
+					},
+				},
+				EncryptionKeys: e3dbClients.EncryptionKeys{
+					Private: e3dbClients.Key{
+						Material: clientConfig.PrivateKey,
+						Type:     e3dbClients.DefaultEncryptionKeyType,
+					},
+					Public: e3dbClients.Key{
+						Material: clientConfig.PublicKey,
+						Type:     e3dbClients.DefaultEncryptionKeyType,
+					},
+				},
+			},
+			AccountUsername: toznySDK.AccountUsername,
+			AccountPassword: toznySDK.AccountPassword,
+			APIEndpoint:     clientConfig.APIURL,
+		}
+
+		toznySDK, err = e3db.NewToznySDKV3(sdkConfig)
+		if err != nil {
+			return diag.Errorf("SDK creation Failed %+v", err)
+		}
+		break
+	default:
+		return diag.Errorf("Account Deletion Not Allowed, Delete through Dashboard")
+	}
+
+	deleteAccountParams = accountClient.DeleteAccountRequestData{
+		AccountID: accountID,
+	}
+
+	// delete account request
+	err = toznySDK.DeleteAccount(ctx, deleteAccountParams)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	d.SetId("")
 	return diags
 }
