@@ -1,5 +1,5 @@
 BINARY=terraform-provider-tozny
-VERSION=0.12.0
+VERSION=0.12.1
 
 default: build
 
