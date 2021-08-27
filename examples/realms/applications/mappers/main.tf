@@ -221,3 +221,64 @@ resource "tozny_realm_application_mapper" "saml_roles_mapper" {
   saml_attribute_name_format = "Basic"
   single_role_attribute = true
 }
+# A resource for creating an application oidc mapper for identity policy realm roles mapper
+resource "tozny_realm_application_mapper" "realm_roles_mapper" {
+   depends_on = [
+    tozny_realm_application.aws_saml_application
+  ]
+  client_credentials_filepath = local.tozny_client_credentials_filepath
+  realm_name = tozny_realm.my_organizations_realm.realm_name
+  application_id = tozny_realm_application.jenkins_oidc_application.application_id
+  name = "Realm Role Policy Mapper"
+  protocol = "openid-connect"
+  mapper_type = "oidc-usermodel-realm-role-mapper"
+  add_to_user_info = true
+  add_to_id_token = true
+  add_to_access_token = true
+  multivalued = false
+  claim_json_type = "String"
+  token_claim_name = "policy"
+  realm_role_prefix= "String"
+}
+
+# A resource for creating an application oidc mapper for identity policy client roles mapper 
+resource "tozny_realm_application_mapper" "client_roles_mapper" {
+   depends_on = [
+    tozny_realm_application.aws_saml_application
+  ]
+  client_credentials_filepath = local.tozny_client_credentials_filepath
+  realm_name = tozny_realm.my_organizations_realm.realm_name
+  application_id = tozny_realm_application.jenkins_oidc_application.application_id
+  name = "Client Role Policy Mapper"
+  protocol = "openid-connect"
+  mapper_type = "oidc-usermodel-client-role-mapper"
+  add_to_user_info = true
+  add_to_id_token = true
+  add_to_access_token = true
+  multivalued = false
+  claim_json_type = "String"
+  token_claim_name = "policy"
+  client_role_prefix = "string"
+  client_id = "tozid-realm-idp"
+}
+
+# A resource for creating an application oidc mapper for identity policy user attribute
+resource "tozny_realm_application_mapper" "user_attributes_mapper" {
+   depends_on = [
+    tozny_realm_application.aws_saml_application
+  ]
+  client_credentials_filepath = local.tozny_client_credentials_filepath
+  realm_name = tozny_realm.my_organizations_realm.realm_name
+  application_id = tozny_realm_application.jenkins_oidc_application.application_id
+  name = "User Attributes Policy Mapper"
+  protocol = "openid-connect"
+  mapper_type = "oidc-usermodel-attribute-mapper"
+  add_to_user_info = true
+  add_to_id_token = true
+  add_to_access_token = true
+  multivalued = false
+  aggregate_attribute_values = false
+  user_attribute = "policy"
+  claim_json_type = "String"
+  token_claim_name = "policy"
+}

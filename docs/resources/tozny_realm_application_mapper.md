@@ -5,6 +5,7 @@ Resource for provisioning a TozID Application Mapper for mapping data during an 
 This resource requires that the account username and password be supplied to the provider either via explicit provider settings or file based credentials.
 
 ## Example Usage
+
 ```hcl
 # Include the Tozny Terraform provider
 provider "tozny" {
@@ -214,38 +215,103 @@ resource "tozny_realm_application_mapper" "saml_roles_mapper" {
   saml_attribute_name_format = "Basic"
   single_role_attribute = true
 }
+
+# A resource for creating an application oidc mapper for identity policy realm roles mapper
+resource "tozny_realm_application_mapper" "realm_roles_mapper" {
+   depends_on = [
+    tozny_realm_application.aws_saml_application
+  ]
+  client_credentials_filepath = local.tozny_client_credentials_filepath
+  realm_name = tozny_realm.my_organizations_realm.realm_name
+  application_id = tozny_realm_application.jenkins_oidc_application.application_id
+  name = "Realm Role Policy Mapper"
+  protocol = "openid-connect"
+  mapper_type = "oidc-usermodel-realm-role-mapper"
+  add_to_user_info = true
+  add_to_id_token = true
+  add_to_access_token = true
+  multivalued = false
+  claim_json_type = "String"
+  token_claim_name = "policy"
+  realm_role_prefix= "String"
+}
+
+# A resource for creating an application oidc mapper for identity policy client roles mapper
+resource "tozny_realm_application_mapper" "client_roles_mapper" {
+   depends_on = [
+    tozny_realm_application.aws_saml_application
+  ]
+  client_credentials_filepath = local.tozny_client_credentials_filepath
+  realm_name = tozny_realm.my_organizations_realm.realm_name
+  application_id = tozny_realm_application.jenkins_oidc_application.application_id
+  name = "Client Role Policy Mapper"
+  protocol = "openid-connect"
+  mapper_type = "oidc-usermodel-client-role-mapper"
+  add_to_user_info = true
+  add_to_id_token = true
+  add_to_access_token = true
+  multivalued = false
+  claim_json_type = "String"
+  token_claim_name = "policy"
+  client_role_prefix = "string"
+  client_id = "tozid-realm-idp"
+}
+
+# A resource for creating an application oidc mapper for identity policy user attribute
+resource "tozny_realm_application_mapper" "user_attributes_mapper" {
+   depends_on = [
+    tozny_realm_application.aws_saml_application
+  ]
+  client_credentials_filepath = local.tozny_client_credentials_filepath
+  realm_name = tozny_realm.my_organizations_realm.realm_name
+  application_id = tozny_realm_application.jenkins_oidc_application.application_id
+  name = "User Attributes Policy Mapper"
+  protocol = "openid-connect"
+  mapper_type = "oidc-usermodel-attribute-mapper"
+  add_to_user_info = true
+  add_to_id_token = true
+  add_to_access_token = true
+  multivalued = false
+  aggregate_attribute_values = false
+  user_attribute = "policy"
+  claim_json_type = "String"
+  token_claim_name = "policy"
+}
 ```
 
 ## Argument Reference
 
 ### Top-Level Arguments
 
-* `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the Terraform provider to use when provisioning this resource. Omit if using `client_credentials_config`.
-* `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when provisioning this resource. Omit if using `client_credentials_filepath`.
-* `application_mapper_id` - (Computed) Service defined unique identifier for the application mapper.
-* `application_id` - (Required) ID of the Application the Mapper is associated with.
-* `realm_name` - (Required) The name of the Realm to provision the Application Mapper in.
-* `name` - (Required) User defined name for the application mapper.
-* `protocol` - (Required) The identity protocol that this mapper will be applied to flows of. Valid values are `openid-connect`, `saml`.
-* `mapper_type` - (Required) The category of data this mapper is applied to. Valid values are `oidc-user-session-note-mapper`, `oidc-user-attribute-mapper`, `oidc-group-membership-mapper`, `saml-role-list-mapper`, `saml-user-property-mapper`.
-* `user_session_note` - (Optional) Name of stored user session note within the UserSessionModel.note map.
-* `user_attribute` - (Optional) Name of stored user attribute within the UserModel.attribute map.
-* `full_group_path` - (Optional) If true, full path format will be used when group membership is mapped, if false, only single-level group paths are used.
-* `token_claim_name` - (Optional) Name of the claim to insert into the token. This can be a fully qualified name like 'address.street'. In this case, a nested json object will be created. To prevent nesting and use dot literally, escape the dot with backslash `(\.)`.
-* `claim_json_type` - (Optional) JSON type that should be used to populate the json claim in the token. Valid `String`, `int`, `bool`, `long`.
-* `add_to_id_token` - (Optional) Indicates if the claim should be added to the id token. Defaults to false.
-* `add_to_access_token` - (Optional) Indicates if the claim should be added to the access token. Defaults to false.
-* `add_to_user_info` - (Optional) Indicates if the claim should be added to the user info. Defaults to false.
-* `multivalued` - (Optional) Indicates if attribute supports multiple values. If true, then the list of all values of this attribute will be set as claim. If false, then just first value will be set as claim.
-* `aggregate_attribute_values` - (Optional) Indicates if attribute values should be aggregated with the group attributes. If using OpenID Connect mapper the multivalued option needs to be enabled too in order to get all the values. Duplicated values are discarded and the order of values is not guaranteed with this option.
-* `saml_attribute_name` - (Optional) Name of the SAML attribute that should be used for mapping an identities name.
-* `saml_attribute_name_format` - (Optional) Format to use for the name attribute for the SAML protocol, valid values are `Basic` `URI Reference` or `Unspecified`.
-* `friendly_name` - (Optional) Standard SAML attribute setting. An optional, more human-readable form of the attribute's name that can be provided if the actual attribute name is cryptic.
-* `role_attribute_name` - (Optional) Name of the SAML attribute you want to put your roles into. i.e. 'Role', 'memberOf'.
-* `property` - (Optional) Name of the property method in the UserModel interface. For example, a value of 'email' would reference the UserModel.getEmail() method.
-* `single_role_attribute` - (Optional) If true, all roles will be stored under one attribute with multiple attribute values.
-* `application_mapper_id` - (Computed) Server defined unique identifier for the Application Mapper.
+- `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the Terraform provider to use when provisioning this resource. Omit if using `client_credentials_config`.
+- `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when provisioning this resource. Omit if using `client_credentials_filepath`.
+- `application_mapper_id` - (Computed) Service defined unique identifier for the application mapper.
+- `application_id` - (Required) ID of the Application the Mapper is associated with.
+- `realm_name` - (Required) The name of the Realm to provision the Application Mapper in.
+- `name` - (Required) User defined name for the application mapper.
+- `protocol` - (Required) The identity protocol that this mapper will be applied to flows of. Valid values are `openid-connect`, `saml`.
+- `mapper_type` - (Required) The category of data this mapper is applied to. Valid values are `oidc-user-session-note-mapper`, `oidc-user-attribute-mapper`, `oidc-group-membership-mapper`, `saml-role-list-mapper`, `saml-user-property-mapper`,`oidc-usermodel-realm-role-mapper`, `oidc-usermodel-client-role-mapper`, `oidc-usermodel-attribute-mapper`..
+- `user_session_note` - (Optional) Name of stored user session note within the UserSessionModel.note map.
+- `user_attribute` - (Optional) Name of stored user attribute within the UserModel.attribute map.
+- `full_group_path` - (Optional) If true, full path format will be used when group membership is mapped, if false, only single-level group paths are used.
+- `token_claim_name` - (Optional) Name of the claim to insert into the token. This can be a fully qualified name like 'address.street'. In this case, a nested json object will be created. To prevent nesting and use dot literally, escape the dot with backslash `(\.)`.
+- `claim_json_type` - (Optional) JSON type that should be used to populate the json claim in the token. Valid `String`, `int`, `bool`, `long`.
+- `add_to_id_token` - (Optional) Indicates if the claim should be added to the id token. Defaults to false.
+- `add_to_access_token` - (Optional) Indicates if the claim should be added to the access token. Defaults to false.
+- `add_to_user_info` - (Optional) Indicates if the claim should be added to the user info. Defaults to false.
+- `multivalued` - (Optional) Indicates if attribute supports multiple values. If true, then the list of all values of this attribute will be set as claim. If false, then just first value will be set as claim.
+- `aggregate_attribute_values` - (Optional) Indicates if attribute values should be aggregated with the group attributes. If using OpenID Connect mapper the multivalued option needs to be enabled too in order to get all the values. Duplicated values are discarded and the order of values is not guaranteed with this option.
+- `saml_attribute_name` - (Optional) Name of the SAML attribute that should be used for mapping an identities name.
+- `saml_attribute_name_format` - (Optional) Format to use for the name attribute for the SAML protocol, valid values are `Basic` `URI Reference` or `Unspecified`.
+- `friendly_name` - (Optional) Standard SAML attribute setting. An optional, more human-readable form of the attribute's name that can be provided if the actual attribute name is cryptic.
+- `role_attribute_name` - (Optional) Name of the SAML attribute you want to put your roles into. i.e. 'Role', 'memberOf'.
+- `property` - (Optional) Name of the property method in the UserModel interface. For example, a value of 'email' would reference the UserModel.getEmail() method.
+- `single_role_attribute` - (Optional) If true, all roles will be stored under one attribute with multiple attribute values.
+- `application_mapper_id` - (Computed) Server defined unique identifier for the Application Mapper.
+- `realm_role_prefix` - (Optional) A prefix for each realm role.
+- `client_id` - (Optional) Client ID for role mappings. Just client roles of this client will be added to the token. If this is unset, client roles of all clients will be added to the token.
+- `client_role_prefix` - (Optional) A prefix for each client role.
 
 ## Attribute Reference
 
-* `id` - Unique ID of the provisioned application mapper.
+- `id` - Unique ID of the provisioned application mapper.

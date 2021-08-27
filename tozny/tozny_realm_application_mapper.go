@@ -59,7 +59,7 @@ func resourceRealmApplicationMapper() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{identityClient.ProtocolSAML, identityClient.ProtocolOIDC}, false),
 			},
 			"mapper_type": {
-				Description: "The category of data this mapper is applied to. Valid values are `oidc-user-session-note-mapper`, `oidc-user-attribute-mapper`, `oidc-group-membership-mapper`, `saml-role-list-mapper`, `saml-user-property-mapper`.",
+				Description: "The category of data this mapper is applied to. Valid values are `oidc-user-session-note-mapper`, `oidc-user-attribute-mapper`, `oidc-group-membership-mapper`, `saml-role-list-mapper`, `saml-user-property-mapper`,`oidc-usermodel-realm-role-mapper`, `oidc-usermodel-client-role-mapper`, `oidc-usermodel-attribute-mapper`.",
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
@@ -68,6 +68,9 @@ func resourceRealmApplicationMapper() *schema.Resource {
 					identityClient.UserAttributeOIDCApplicationMapperType,
 					identityClient.RoleListSAMLApplicationMapperType,
 					identityClient.UserPropertySAMLApplicationMapperType,
+					identityClient.UserModelAttributeOIDCApplicationMapperType,
+					identityClient.UserModelClientRoleOIDCApplicationMapperType,
+					identityClient.UserModelRealmRoleOIDCApplicationMapperType,
 					identityClient.GroupMembershipOIDCApplicationMapperType,
 				}, false),
 			},
@@ -182,6 +185,28 @@ func resourceRealmApplicationMapper() *schema.Resource {
 				ForceNew:    true,
 				Default:     false,
 			},
+
+			"realm_role_prefix": {
+				Description: "A prefix for each realm role",
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Default:     false,
+			},
+			"client_id": {
+				Description: "Client ID for role mappings. Just client roles of this client will be added to the token. If this is unset, client roles of all clients will be added to the token.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Default:     false,
+			},
+			"client_role_prefix": {
+				Description: "A prefix for each client role",
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Default:     false,
+			},
 		},
 	}
 }
@@ -217,6 +242,9 @@ func resourceRealmApplicationMapperCreate(ctx context.Context, d *schema.Resourc
 			SAMLAttributeName:        d.Get("saml_attribute_name").(string),
 			SAMLAttributeNameFormat:  d.Get("saml_attribute_name_format").(string),
 			SingleRoleAttribute:      d.Get("single_role_attribute").(bool),
+			RealmRolePrefix:          d.Get("realm_role_prefix").(string),
+			ClientRoleClientID:       d.Get("client_id").(string),
+			ClientRolePrefix:         d.Get("client_role_prefix").(string),
 		},
 	}
 	applicationMapper, err := toznySDK.CreateRealmApplicationMapper(ctx, createApplicationMapperParams)
@@ -266,6 +294,9 @@ func resourceRealmApplicationMapperRead(ctx context.Context, d *schema.ResourceD
 	d.Set("saml_attribute_name", applicationMapper.SAMLAttributeName)
 	d.Set("saml_attribute_name_format", applicationMapper.SAMLAttributeNameFormat)
 	d.Set("single_role_attribute", applicationMapper.SingleRoleAttribute)
+	d.Set("realm_role_prefix", applicationMapper.RealmRolePrefix)
+	d.Set("client_id", applicationMapper.ClientRoleClientID)
+	d.Set("client_role_prefix", applicationMapper.ClientRolePrefix)
 
 	return diags
 }
