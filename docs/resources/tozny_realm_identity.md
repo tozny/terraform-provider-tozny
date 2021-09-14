@@ -5,9 +5,10 @@ Resource to manage an identity for a TozID Realm. Useful for supporting service 
 This resource requires that the account username and password be supplied to the provider either via explicit provider settings or file based credentials.
 
 This resource currently only supports supplying a password for the user. This is saved to terraform state for use in other modules. The intent is this resource creates service
-users which are embedded in other providers and resources. At this time, it is not suggested to create identities for end users with this resource.
+users which are embedded in other providers and resources. You are also able to update an identities password using the resource. At this time, it is not suggested to create identities for end users with this resource.
 
 ## Example Usage
+
 ```hcl
 # Include the Tozny Terraform provider
 provider "tozny" {
@@ -100,17 +101,18 @@ resource "tozny_realm_identity" "machine_user_step" {
 
 ### Top-Level Arguments
 
-* `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the Terraform provider to use when setting default groups. Omit if using `client_credentials_config`.
-* `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when setting default groups. Omit if using `client_credentials_filepath`.
-* `realm_name` - (Required) The name of the realm with which to associate the identity.
-* `username - (Required) The username for this identity.
-* `email - (Required) The email address associated with this identity.
-* `client_registration_token - (Required) A registration token for the realm allowed to create identities.
-* `broker_target_url - (Required) The base link for password resets.
-* `password - (Required) The password for this identity. Ideally this comes from a secret store of some kind.
-* `first_name` - (Optional) The first name associated with this identity.
-* `last_name` - (Optional) The last name associated with this identity.
-* `recovery_email_ttl` - (Optional) The length of time a recovery email is valid for.
+- `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the Terraform provider to use when setting default groups. Omit if using `client_credentials_config`.
+- `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when setting default groups. Omit if using `client_credentials_filepath`.
+- `realm_name` - (Required) The name of the realm with which to associate the identity.
+- `username - (Required) The username for this identity.
+- `email - (Required) The email address associated with this identity.
+- `client_registration_token - (Required) A registration token for the realm allowed to create identities.
+- `broker_target_url - (Required) The base link for password resets.
+- `password - (Required) The password for this identity. Ideally this comes from a secret store of some kind.
+- `first_name` - (Optional) The first name associated with this identity.
+- `last_name` - (Optional) The last name associated with this identity.
+- `recovery_email_ttl` - (Optional) The length of time a recovery email is valid for.
 
 ## Attribute Reference
-* `id` - The Tozny Client ID for the provisioned identity.
+
+- `id` - The Tozny Client ID for the provisioned identity.

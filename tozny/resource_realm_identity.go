@@ -3,6 +3,7 @@ package tozny
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -16,6 +17,7 @@ func resourceRealmIdentity() *schema.Resource {
 		CreateContext: resourceRealmIdentityCreate,
 		ReadContext:   resourceRealmIdentityRead,
 		DeleteContext: resourceRealmIdentityDelete,
+		UpdateContext: resourceRealmIdentityUpdate,
 		Schema: map[string]*schema.Schema{
 			"client_credentials_filepath": {
 				Description:   "The filepath to Tozny client credentials for the Terraform provider to use when provisioning this realm provider.",
@@ -68,7 +70,6 @@ func resourceRealmIdentity() *schema.Resource {
 				Description: "The password for this identity. Ideally this comes from a secret store of some kind.",
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
 				Sensitive:   true,
 			},
 			"first_name": {
@@ -111,7 +112,7 @@ func resourceRealmIdentityCreate(ctx context.Context, d *schema.ResourceData, m 
 	emailExpiryMinutes := d.Get("recovery_email_ttl").(int)
 	realm := e3db.Realm{
 		Name:               realmName,
-		App:                "account",
+		App:                e3db.AccountApplicationName,
 		APIEndpoint:        toznySDK.APIEndpoint,
 		BrokerTargetURL:    brokerTargetURL,
 		EmailExpiryMinutes: emailExpiryMinutes,
@@ -152,6 +153,57 @@ func resourceRealmIdentityDelete(ctx context.Context, d *schema.ResourceData, m 
 	}
 
 	d.SetId("")
+
+	return diags
+}
+func resourceRealmIdentityUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+	toznySDK, err := MakeToznySDK(d, m)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	// Check if Password has changed
+	if d.HasChange("password") {
+		// Get the old password
+		oldPassword, _ := d.GetChange("password")
+		realmName := d.Get("realm_name").(string)
+		username := d.Get("username").(string)
+		brokerTargetURL := d.Get("broker_target_url").(string)
+		emailExpiryMinutes := d.Get("recovery_email_ttl").(int)
+		identityID, err := strconv.ParseInt(d.Id(), 10, 64)
+		if err != nil {
+			diag.FromErr(fmt.Errorf("Error unable to parse identity id: %+v %+v", d.Id(), err))
+		}
+		// Login the Identity
+		request := e3db.TozIDLoginRequest{
+			Username:   username,
+			Password:   oldPassword.(string),
+			RealmName:  realmName,
+			APIBaseURL: toznySDK.APIEndpoint,
+		}
+		identitySdk, err := e3db.GetSDKV3ForTozIDUser(request)
+		if err != nil {
+			diag.FromErr(fmt.Errorf("Error Could not log in %+v", err))
+		}
+		// Populate the Identity
+		identity := e3db.Identity{
+			ID:       identityID,
+			Username: username,
+			Realm: &e3db.Realm{
+				Name:               realmName,
+				App:                e3db.AccountApplicationName,
+				APIEndpoint:        toznySDK.APIEndpoint,
+				BrokerTargetURL:    brokerTargetURL,
+				EmailExpiryMinutes: emailExpiryMinutes,
+			},
+			ToznySDKV3: identitySdk,
+		}
+		// Change Password
+		_, err = identity.ChangePassword(d.Get("password").(string))
+		if err != nil {
+			diag.FromErr(fmt.Errorf("Error Unable to Change Identity (%+v) Password: %+v", identity, err))
+		}
+	}
 
 	return diags
 }
