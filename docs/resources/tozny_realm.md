@@ -98,23 +98,25 @@ resource "tozny_realm_broker_delegation" "allow_tozny_hosted_brokering_policy" {
 
 ### Top-Level Arguments
 
-* `realm_id` - (Computed)Service defined unique identifier for the realm.
-* `domain` - (Computed) Service defined & externally unique reference for the realm.
-* `admin_url` - (Computed) URL for realm administration console.
-* `active` - (Computed) Whether the realm is active for applications and identities to consume.
-* `broker_identity_tozny_id` - (Computed) The Tozny Client ID associated with the Identity used to broker interactions between the realm and it's Identities. Will be empty if no realm broker Identity has been registered.
-* `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the provider to use when provisioning this realm. Omit if using `client_credentials_config`.
-* `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use  when provisioning this realm. Omit if using `client_credentials_filepath`.
-* `realm_name` - (Required) User defined identifier for the realm.
-* `sovereign_name` - (Required) User defined sovereign identifier.
-* `sovereign` - (Computed) The admin identity for a realm.
-* `default_registration_token` - (Optional) The default registration token to use for registering new Identities with this Realm.
+- `realm_id` - (Computed)Service defined unique identifier for the realm.
+- `domain` - (Computed) Service defined & externally unique reference for the realm.
+- `admin_url` - (Computed) URL for realm administration console.
+- `active` - (Computed) Whether the realm is active for applications and identities to consume.
+- `broker_identity_tozny_id` - (Computed) The Tozny Client ID associated with the Identity used to broker interactions between the realm and it's Identities. Will be empty if no realm broker Identity has been registered.
+- `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the provider to use when provisioning this realm. Omit if using `client_credentials_config`.
+- `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when provisioning this realm. Omit if using `client_credentials_filepath`.
+- `realm_name` - (Required) User defined identifier for the realm.
+- `sovereign_name` - (Required) User defined sovereign identifier.
+- `sovereign` - (Computed) The admin identity for a realm.
+- `default_registration_token` - (Optional) The default registration token to use for registering new Identities with this Realm.
+- `mpc_enabled` - (Optional) Flag for enabling MPC for the Realm. Defaults to false.
+- `tozid_federation_enabled` - (Optional) Flag for enabling TozID Federated Realm. Defaults to False.
 
 ### Sovereign Arguments
 
-* `id` - (Computed) Service defined unique identifier for the sovereign.
-* `name` - (Computed) User defined sovereign identifier.
+- `id` - (Computed) Service defined unique identifier for the sovereign.
+- `name` - (Computed) User defined sovereign identifier.
 
 ## Attribute Reference
 
-* `id` - Unique ID of the provisioned Account.
+- `id` - Unique ID of the provisioned Account.

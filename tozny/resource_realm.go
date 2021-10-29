@@ -102,6 +102,20 @@ func resourceRealm() *schema.Resource {
 					},
 				},
 			},
+			"mpc_enabled": {
+				Description: "Flag to enable MPC for the Realm.",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				ForceNew:    true,
+			},
+			"tozid_federation_enabled": {
+				Description: "Flag to enable TozID Federation for the Realm.",
+				Type:        schema.TypeBool,
+				Default:     false,
+				Optional:    true,
+				ForceNew:    true,
+			},
 		},
 	}
 }
@@ -126,6 +140,15 @@ func resourceRealmCreate(ctx context.Context, d *schema.ResourceData, m interfac
 		return diag.FromErr(err)
 	}
 
+	mpcEnabled := d.Get("mpc_enabled").(bool)
+	tozidFederation := d.Get("tozid_federation_enabled").(bool)
+	err = toznySDK.RealmSettingsUpdate(ctx, d.Get("realm_name").(string), identityClient.RealmSettingsUpdateRequest{
+		MPCEnabled:             &mpcEnabled,
+		TozIDFederationEnabled: &tozidFederation,
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	d.Set("realm_id", realm.ID)
 	d.Set("domain", realm.Domain)
 	d.Set("admin_url", realm.AdminURL)
@@ -137,6 +160,8 @@ func resourceRealmCreate(ctx context.Context, d *schema.ResourceData, m interfac
 			"name": realm.Sovereign.Name,
 		},
 	})
+	d.Set("mpc_enabled", d.Get("mpc_enabled"))
+	d.Set("tozid_federation_enabled", d.Get("tozid_federation_enabled"))
 
 	// Associate created Realm with Terraform state and signal success
 	d.SetId(fmt.Sprintf("%d", realm.ID))
@@ -160,6 +185,11 @@ func resourceRealmRead(ctx context.Context, d *schema.ResourceData, m interface{
 		return diag.FromErr(err)
 	}
 
+	privateRealmInfo, err := toznySDK.PrivateRealmInfo(ctx, d.Get("realm_name").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	d.Set("realm_id", realm.ID)
 	d.Set("domain", realm.Domain)
 	d.Set("admin_url", realm.AdminURL)
@@ -171,6 +201,8 @@ func resourceRealmRead(ctx context.Context, d *schema.ResourceData, m interface{
 			"name": realm.Sovereign.Name,
 		},
 	})
+	d.Set("mpc_enabled", privateRealmInfo.MPCEnabled)
+	d.Set("tozid_federation_enabled", privateRealmInfo.TozIDFederationEnabled)
 
 	return diags
 }
