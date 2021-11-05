@@ -8,7 +8,7 @@ terraform {
       # for Tozny registry.terraform.io/tozny
       source  = "tozny/tozny"
       # Pin Tozny provider version
-      version = ">=0.14.0"
+      version = ">=0.15.0"
     }
   }
 }
@@ -241,7 +241,7 @@ resource "tozny_realm_application_mapper" "realm_roles_mapper" {
   realm_role_prefix= "String"
 }
 
-# A resource for creating an application oidc mapper for identity policy client roles mapper 
+# A resource for creating an application oidc mapper for identity policy client roles mapper
 resource "tozny_realm_application_mapper" "client_roles_mapper" {
    depends_on = [
     tozny_realm_application.aws_saml_application
