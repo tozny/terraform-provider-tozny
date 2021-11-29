@@ -10,7 +10,7 @@ This resource requires that the account username and password be supplied to the
 # Include the Tozny Terraform provider
 provider "tozny" {
   api_endpoint = "http://platform.local.tozny.com:8000"
-  account_username = "test+${random_string.account_username_salt.result}@tozny.com"
+  account_username = "test-emails-group+${random_string.account_username_salt.result}@tozny.com"
 }
 
 # Generate a random string for use in creating
@@ -87,34 +87,34 @@ resource "tozny_realm_provider" "ldap_identity_provider" {
 
 ### Top-Level Arguments
 
-* `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the Terraform provider to use when provisioning this realm identity provider. Omit if using `client_credentials_config`.
-* `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when provisioning this realm identity provider. Omit if using `client_credentials_filepath`.
-* `provider_id` - (Computed) Service defined unique identifier for the provider.
-* `realm_name` - (Required) The name of the realm to associate the provider with.
-* `name` - (Required) User defined name for the provider.
-* `provider_type` - (Optional) The type of provider. Valid values are `ldap`. Defaults to `ldap`.
-* `active` - (Optional) Whether the provider is active for the realm to sync identities from. Defaults to `true`.
-* `import_identities` - (Optional) If true, LDAP identities will be imported into the realm and synced via the configured sync policies. Defaults to `true`.
-* `priority` - (Optional) Priority for the provider when doing identity lookups for the realm. Lower numbers equal higher priority. Defaults to `0`.
-* `connection_settings` - (Required) Settings for the realm to use when syncing identities from the provider.
+- `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the Terraform provider to use when provisioning this realm identity provider. Omit if using `client_credentials_config`.
+- `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when provisioning this realm identity provider. Omit if using `client_credentials_filepath`.
+- `provider_id` - (Computed) Service defined unique identifier for the provider.
+- `realm_name` - (Required) The name of the realm to associate the provider with.
+- `name` - (Required) User defined name for the provider.
+- `provider_type` - (Optional) The type of provider. Valid values are `ldap`. Defaults to `ldap`.
+- `active` - (Optional) Whether the provider is active for the realm to sync identities from. Defaults to `true`.
+- `import_identities` - (Optional) If true, LDAP identities will be imported into the realm and synced via the configured sync policies. Defaults to `true`.
+- `priority` - (Optional) Priority for the provider when doing identity lookups for the realm. Lower numbers equal higher priority. Defaults to `0`.
+- `connection_settings` - (Required) Settings for the realm to use when syncing identities from the provider.
 
 ### Connection Settings Arguments
 
-* `type` - (Required) Type of the provider to connect to. Valid values are `ad` (Active Directory), `Red Hat Directory Server`, `Tivoli`, `Novell e Directory` or `other`.
-* `identity_name_attribute` - (Required) Name of LDAP attribute, which is mapped as the identity name. For many LDAP server vendors it can be 'uid'. For Active directory it can be 'sAMAccountName' or 'cn'. The attribute should be filled for all LDAP identity records you want to import from LDAP to the realm.
-* `rdn_attribute` - (Required) Name of LDAP attribute, which is used as RDN (top attribute) of typical user DN. Usually it's the same as Username LDAP attribute, however it's not required. For example for Active directory it's common to use 'cn' as RDN attribute when username attribute might be 'sAMAccountName'.
-* `uuid_attribute` - (Required) Name of LDAP attribute, which is used as unique object identifier (UUID) for objects in LDAP. For many LDAP server vendors it's 'entryUUID' however some are different. For example for Active directory it should be 'objectGUID'. If your LDAP server really doesn't support the notion of UUID, you can use any other attribute, which is supposed to be unique among LDAP users in tree. For example 'uid' or 'entryDN'.
-* `identity_object_classes` - (Required) All values of LDAP objectClass attribute for identities in LDAP. Newly created Realm identities will be written to LDAP with all those object classes and existing LDAP identity records are found just if they contain all those object classes.
-* `connection_url` - (Required) URL for connecting to provider.
-* `identity_dn` - (Required) Full DN of LDAP tree where your identities are. This DN is parent of LDAP identities. It could be for example 'ou=users,dc=example,dc=com' assuming that your typical identity will have DN like 'uid=john,ou=users,dc=example,dc=com'.
-* `authentication_type` - (Required) LDAP Authentication type. Valid values are 'none' (anonymous LDAP authentication) or 'simple' (Bind credential + Bind password authentication).
-* `bind_dn` - (Required) DN of LDAP admin, which will be used by the Realm to access LDAP server.
-* `bind_credential` - (Required) Password of LDAP admin.
-* `search_scope` - (Required) For one level, we search for users just in DNs specified by Identity DNs. For subtree, we search in whole of their subtree. 1= `One Level` 2 = `Subtree`.
-* `trust_store_spi_mode` - (Required) Specifies whether LDAP connection will use the truststore SPI with the truststore configured for the Realm. Valid values are `always`, `never`, or `ldapsOnly`.
-* `connection_pooling` - (Required) specifies whether the realm use connection pooling for accessing LDAP server.
-* `pagination` - (Required) Specifies whether the LDAP server to connect to supports pagination.
+- `type` - (Required) Type of the provider to connect to. Valid values are `ad` (Active Directory), `Red Hat Directory Server`, `Tivoli`, `Novell e Directory` or `other`.
+- `identity_name_attribute` - (Required) Name of LDAP attribute, which is mapped as the identity name. For many LDAP server vendors it can be 'uid'. For Active directory it can be 'sAMAccountName' or 'cn'. The attribute should be filled for all LDAP identity records you want to import from LDAP to the realm.
+- `rdn_attribute` - (Required) Name of LDAP attribute, which is used as RDN (top attribute) of typical user DN. Usually it's the same as Username LDAP attribute, however it's not required. For example for Active directory it's common to use 'cn' as RDN attribute when username attribute might be 'sAMAccountName'.
+- `uuid_attribute` - (Required) Name of LDAP attribute, which is used as unique object identifier (UUID) for objects in LDAP. For many LDAP server vendors it's 'entryUUID' however some are different. For example for Active directory it should be 'objectGUID'. If your LDAP server really doesn't support the notion of UUID, you can use any other attribute, which is supposed to be unique among LDAP users in tree. For example 'uid' or 'entryDN'.
+- `identity_object_classes` - (Required) All values of LDAP objectClass attribute for identities in LDAP. Newly created Realm identities will be written to LDAP with all those object classes and existing LDAP identity records are found just if they contain all those object classes.
+- `connection_url` - (Required) URL for connecting to provider.
+- `identity_dn` - (Required) Full DN of LDAP tree where your identities are. This DN is parent of LDAP identities. It could be for example 'ou=users,dc=example,dc=com' assuming that your typical identity will have DN like 'uid=john,ou=users,dc=example,dc=com'.
+- `authentication_type` - (Required) LDAP Authentication type. Valid values are 'none' (anonymous LDAP authentication) or 'simple' (Bind credential + Bind password authentication).
+- `bind_dn` - (Required) DN of LDAP admin, which will be used by the Realm to access LDAP server.
+- `bind_credential` - (Required) Password of LDAP admin.
+- `search_scope` - (Required) For one level, we search for users just in DNs specified by Identity DNs. For subtree, we search in whole of their subtree. 1= `One Level` 2 = `Subtree`.
+- `trust_store_spi_mode` - (Required) Specifies whether LDAP connection will use the truststore SPI with the truststore configured for the Realm. Valid values are `always`, `never`, or `ldapsOnly`.
+- `connection_pooling` - (Required) specifies whether the realm use connection pooling for accessing LDAP server.
+- `pagination` - (Required) Specifies whether the LDAP server to connect to supports pagination.
 
 ## Attribute Reference
 
-* `id` - Unique ID of the provisioned provider.
+- `id` - Unique ID of the provisioned provider.

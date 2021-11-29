@@ -5,11 +5,12 @@ Resource for provisioning a TozID Application OIDC Client Secret for integrating
 This resource requires that the account username and password be supplied to the provider either via explicit provider settings or file based credentials.
 
 ## Example Usage
+
 ```hcl
 # Include the Tozny Terraform provider
 provider "tozny" {
   api_endpoint = "http://platform.local.tozny.com:8000"
-  account_username = "test+${random_string.account_username_salt.result}@tozny.com"
+  account_username = "test-emails-group+${random_string.account_username_salt.result}@tozny.com"
 }
 
 # Generate a random string for use in creating
@@ -165,14 +166,14 @@ resource "tozny_realm_application_client_secret" "jenkins_oidc_client_secret_ter
 
 ### Top-Level Arguments
 
-* `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the Terraform provider to use when provisioning this application client secret. Omit if using `client_credentials_config`.
-* `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when provisioning this application client secret. Omit if using `client_credentials_filepath`.
-* `secret` - (Computed) OIDC Client secret for the application. Will always be empty if `persist_client_secret_to_terraform` is `false`.
-* `application_id` - (Required) The application ID to retrieve the client secret for.
-* `realm_name` - (Required) The name of the realm the application is associated with.
-* `persist_client_secret_to_terraform` - (Optional) Whether or not the client secret should be persisted to terraform. Defaults to true.
-* `client_secret_save_filepath` - (Optional) The filepath to save the client secret to. If not specified the secret will not be saved to the filesystem.
+- `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the Terraform provider to use when provisioning this application client secret. Omit if using `client_credentials_config`.
+- `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when provisioning this application client secret. Omit if using `client_credentials_filepath`.
+- `secret` - (Computed) OIDC Client secret for the application. Will always be empty if `persist_client_secret_to_terraform` is `false`.
+- `application_id` - (Required) The application ID to retrieve the client secret for.
+- `realm_name` - (Required) The name of the realm the application is associated with.
+- `persist_client_secret_to_terraform` - (Optional) Whether or not the client secret should be persisted to terraform. Defaults to true.
+- `client_secret_save_filepath` - (Optional) The filepath to save the client secret to. If not specified the secret will not be saved to the filesystem.
 
 ## Attribute Reference
 
-* `id` - Terraform defined unique id for the resource.
+- `id` - Terraform defined unique id for the resource.

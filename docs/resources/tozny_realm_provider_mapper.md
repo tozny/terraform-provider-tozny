@@ -10,7 +10,7 @@ This resource requires that the account username and password be supplied to the
 # Include the Tozny Terraform provider
 provider "tozny" {
   api_endpoint = "http://platform.local.tozny.com:8000"
-  account_username = "test+${random_string.account_username_salt.result}@tozny.com"
+  account_username = "test-emails-group+${random_string.account_username_salt.result}@tozny.com"
 }
 
 # Generate a random string for use in creating
@@ -112,26 +112,26 @@ resource "tozny_realm_provider_mapper" "ldap_group_mapper" {
 
 ### Top-Level Arguments
 
-* `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the Terraform provider to use when provisioning this realm identity provider mapper. Omit if using `client_credentials_config`.
-* `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when provisioning this realm identity provider mapper. Omit if using `client_credentials_filepath`.
-* `provider_mapper_id` - (Computed) Service defined unique identifier for the provider mapper.
-* `provider_id` - (Required) Service defined unique identifier for the provider to associate the mapper with.
-* `realm_name` - (Required) The name of the realm to associate the provider mapper with.
-* `name` - (Required) User defined name for the provider mapper.
-* `provider_type` - (Required) The type of the provider mapper. Valid values are `msad-user-account-control-mapper`, `msad-lds-user-account-control-mapper`, `group-ldap-mapper`, `user-attribute-ldap-mapper`, `role-ldap-mapper`, `hardcoded-ldap-role-mapper`, `full-name-ldap-mapper`, `hardcoded-ldap-group-mapper`, `hardcoded-ldap-attribute-mapper`.
-* `groups_dn` - (Required) LDAP DN where are groups of this tree saved. For example 'ou=groups,dc=example,dc=org'.
-* `group_name_attribute` - (Required) Name of LDAP attribute, which is used in group objects for name and RDN of group. Usually it will be 'cn' . In this case typical group/role object may have DN like 'cn=Group1,ou=groups,dc=example,dc=org'.
-* `group_object_classes` - (Required) Object class (or classes) of the group object. In typical LDAP deployment it could be 'groupOfNames' . In Active Directory it's usually 'group'.
-* `preserve_group_inheritance` - (Required) Flag whether group inheritance from LDAP should be propagated to the Realm. If false, then all LDAP groups will be mapped as flat top-level groups in the Realm. Otherwise group inheritance is preserved into the Realm, but the group sync might fail if LDAP structure contains recursions or multiple parent groups per child groups.
-* `ignore_missing_groups` - (Required) Whether missing groups in the hierarchy should be ignored.
-* `member_of_attribute` - (Required) Used just when `identity_groups_retrieval_strategy` is GET_GROUPS_FROM_USER_MEMBEROF_ATTRIBUTE . It specifies the name of the LDAP attribute on the LDAP identity, which contains the groups, which the identity is a member of. Usually it will be 'memberOf'.
-* `membership_attribute` - (Required) Name of LDAP attribute on group, which is used for membership mappings. Usually it will be 'member' .However when 'Membership Attribute Type' is 'UID' then 'Membership LDAP Attribute' could be typically 'memberUid'.
-* `membership_attribute_type` - (Required) DN means that LDAP group has it's members declared in form of their full DN. For example 'member: uid=john,ou=users,dc=example,dc=com' . UID means that LDAP group has it's members declared in form of pure user uids. For example 'memberUid: john'. Valid values are `DN` or `UID`.
-* `membership_identity_attribute` - (Required) Used just if Membership Attribute Type is UID. It is name of LDAP attribute on user, which is used for membership mappings. Usually it will be 'uid' . For example if value of 'Membership User LDAP Attribute' is 'uid' and LDAP group has 'memberUid: john', then it is expected that particular LDAP user will have attribute 'uid: john'.
-* `mode` - (Required) LDAP_ONLY means that all group mappings of users are retrieved from LDAP and saved into LDAP. READ_ONLY is Read-only LDAP mode where group mappings are retrieved from both LDAP and DB and merged together. New group joins are not saved to LDAP but to the Realm. IMPORT is Read-only LDAP mode where group mappings are retrieved from LDAP just at the time when user is imported from LDAP and then they are saved to the realm.
-* `identity_groups_retrieval_strategy` - (Required) Specify how to retrieve groups of user. LOAD_GROUPS_BY_MEMBER_ATTRIBUTE means that roles of user will be retrieved by sending LDAP query to retrieve all groups where 'member' is our user. GET_GROUPS_FROM_USER_MEMBEROF_ATTRIBUTE means that groups of user will be retrieved from 'memberOf' attribute of our user. Or from the other attribute specified by 'Member-Of LDAP Attribute' . LOAD_GROUPS_BY_MEMBER_ATTRIBUTE_RECURSIVELY is applicable just in Active Directory and it means that groups of user will be retrieved recursively with usage of LDAP_MATCHING_RULE_IN_CHAIN Ldap extension.
-* `drop_missing_groups_on_sync` - (Required) If this flag is true, then during sync of groups from LDAP to the Realm, we will keep just those Realm groups, which still exists in LDAP. Rest will be deleted.
+- `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the Terraform provider to use when provisioning this realm identity provider mapper. Omit if using `client_credentials_config`.
+- `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when provisioning this realm identity provider mapper. Omit if using `client_credentials_filepath`.
+- `provider_mapper_id` - (Computed) Service defined unique identifier for the provider mapper.
+- `provider_id` - (Required) Service defined unique identifier for the provider to associate the mapper with.
+- `realm_name` - (Required) The name of the realm to associate the provider mapper with.
+- `name` - (Required) User defined name for the provider mapper.
+- `provider_type` - (Required) The type of the provider mapper. Valid values are `msad-user-account-control-mapper`, `msad-lds-user-account-control-mapper`, `group-ldap-mapper`, `user-attribute-ldap-mapper`, `role-ldap-mapper`, `hardcoded-ldap-role-mapper`, `full-name-ldap-mapper`, `hardcoded-ldap-group-mapper`, `hardcoded-ldap-attribute-mapper`.
+- `groups_dn` - (Required) LDAP DN where are groups of this tree saved. For example 'ou=groups,dc=example,dc=org'.
+- `group_name_attribute` - (Required) Name of LDAP attribute, which is used in group objects for name and RDN of group. Usually it will be 'cn' . In this case typical group/role object may have DN like 'cn=Group1,ou=groups,dc=example,dc=org'.
+- `group_object_classes` - (Required) Object class (or classes) of the group object. In typical LDAP deployment it could be 'groupOfNames' . In Active Directory it's usually 'group'.
+- `preserve_group_inheritance` - (Required) Flag whether group inheritance from LDAP should be propagated to the Realm. If false, then all LDAP groups will be mapped as flat top-level groups in the Realm. Otherwise group inheritance is preserved into the Realm, but the group sync might fail if LDAP structure contains recursions or multiple parent groups per child groups.
+- `ignore_missing_groups` - (Required) Whether missing groups in the hierarchy should be ignored.
+- `member_of_attribute` - (Required) Used just when `identity_groups_retrieval_strategy` is GET_GROUPS_FROM_USER_MEMBEROF_ATTRIBUTE . It specifies the name of the LDAP attribute on the LDAP identity, which contains the groups, which the identity is a member of. Usually it will be 'memberOf'.
+- `membership_attribute` - (Required) Name of LDAP attribute on group, which is used for membership mappings. Usually it will be 'member' .However when 'Membership Attribute Type' is 'UID' then 'Membership LDAP Attribute' could be typically 'memberUid'.
+- `membership_attribute_type` - (Required) DN means that LDAP group has it's members declared in form of their full DN. For example 'member: uid=john,ou=users,dc=example,dc=com' . UID means that LDAP group has it's members declared in form of pure user uids. For example 'memberUid: john'. Valid values are `DN` or `UID`.
+- `membership_identity_attribute` - (Required) Used just if Membership Attribute Type is UID. It is name of LDAP attribute on user, which is used for membership mappings. Usually it will be 'uid' . For example if value of 'Membership User LDAP Attribute' is 'uid' and LDAP group has 'memberUid: john', then it is expected that particular LDAP user will have attribute 'uid: john'.
+- `mode` - (Required) LDAP_ONLY means that all group mappings of users are retrieved from LDAP and saved into LDAP. READ_ONLY is Read-only LDAP mode where group mappings are retrieved from both LDAP and DB and merged together. New group joins are not saved to LDAP but to the Realm. IMPORT is Read-only LDAP mode where group mappings are retrieved from LDAP just at the time when user is imported from LDAP and then they are saved to the realm.
+- `identity_groups_retrieval_strategy` - (Required) Specify how to retrieve groups of user. LOAD_GROUPS_BY_MEMBER_ATTRIBUTE means that roles of user will be retrieved by sending LDAP query to retrieve all groups where 'member' is our user. GET_GROUPS_FROM_USER_MEMBEROF_ATTRIBUTE means that groups of user will be retrieved from 'memberOf' attribute of our user. Or from the other attribute specified by 'Member-Of LDAP Attribute' . LOAD_GROUPS_BY_MEMBER_ATTRIBUTE_RECURSIVELY is applicable just in Active Directory and it means that groups of user will be retrieved recursively with usage of LDAP_MATCHING_RULE_IN_CHAIN Ldap extension.
+- `drop_missing_groups_on_sync` - (Required) If this flag is true, then during sync of groups from LDAP to the Realm, we will keep just those Realm groups, which still exists in LDAP. Rest will be deleted.
 
 ## Attribute Reference
 
-* `id` - Unique ID of the provisioned provider mapper.
+- `id` - Unique ID of the provisioned provider mapper.

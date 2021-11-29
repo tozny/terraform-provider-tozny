@@ -5,11 +5,12 @@ A data source for interacting with a TozID Realm Role for mapping permissions to
 This resource requires that the account username and password be supplied to the provider either via explicit provider settings or file based credentials.
 
 ## Example Usage
+
 ```hcl
 # Include the Tozny Terraform provider
 provider "tozny" {
   api_endpoint = "http://platform.local.tozny.com:8000"
-  account_username = "test+${random_string.account_username_salt.result}@tozny.com"
+  account_username = "test-emails-group+${random_string.account_username_salt.result}@tozny.com"
 }
 
 # Generate a random string for use in creating
@@ -107,13 +108,13 @@ data "tozny_realm_role" "realm_offline_access_role" {
 
 ### Top-Level Arguments
 
-* `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the provider to use when populating data in this data source. For this data source either this value or both `account_username` and `account_password` must be set on the provider. Omit if using `client_credentials_config`.
-* `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when populating data in this data source. For this data source either this value or both `account_username` and `account_password` must be set on the provider. Omit if using `client_credentials_filepath`.
-* `realm_name` - (Required) The name of the Realm where the realm role is defined.
-* `name` - (Required) The name of the realm role on the service, used as the primary identifier for finding the role.
+- `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the provider to use when populating data in this data source. For this data source either this value or both `account_username` and `account_password` must be set on the provider. Omit if using `client_credentials_config`.
+- `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when populating data in this data source. For this data source either this value or both `account_username` and `account_password` must be set on the provider. Omit if using `client_credentials_filepath`.
+- `realm_name` - (Required) The name of the Realm where the realm role is defined.
+- `name` - (Required) The name of the realm role on the service, used as the primary identifier for finding the role.
 
 ## Attribute Reference
 
-* `id` - Unique ID of the provisioned realm role. This is the same as `realm_role_id`
-* `description` - The description of the realm role as defined on the server.
-* `realm_role_id` - Service defined unique identifier for the realm role.
+- `id` - Unique ID of the provisioned realm role. This is the same as `realm_role_id`
+- `description` - The description of the realm role as defined on the server.
+- `realm_role_id` - Service defined unique identifier for the realm role.

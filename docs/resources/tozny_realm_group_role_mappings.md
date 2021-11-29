@@ -10,7 +10,7 @@ This resource requires that the account username and password be supplied to the
 # Include the Tozny Terraform provider
 provider "tozny" {
   api_endpoint = "http://platform.local.tozny.com:8000"
-  account_username = "test+${random_string.account_username_salt.result}@tozny.com"
+  account_username = "test-emails-group+${random_string.account_username_salt.result}@tozny.com"
 }
 
 # Generate a random string for use in creating
@@ -189,25 +189,25 @@ resource "tozny_realm_group_role_mappings" "admin_members_role_mappings" {
 
 ### Top-Level Arguments
 
-* `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the provider to use when provisioning this realm group role mapping. For this resource either this value or both `account_username` and `account_password` must be set on the provider. Omit if using `client_credentials_config`.
-* `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when provisioning this realm group role mapping. For this resource either this value or both `account_username` and `account_password` must be set on the provider. Omit if using `client_credentials_filepath`.
-* `realm_name` - (Required) The name of the Realm to provision the Application for.
-* `group_id` - (Required) Server defined unique identifier for the group to provision role mappings for.
-* `application_role` (Optional) An application role to map to members of the group.
-* `realm_role` (Optional) Configuration for mapping a realm role to members of a group.
+- `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the provider to use when provisioning this realm group role mapping. For this resource either this value or both `account_username` and `account_password` must be set on the provider. Omit if using `client_credentials_config`.
+- `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when provisioning this realm group role mapping. For this resource either this value or both `account_username` and `account_password` must be set on the provider. Omit if using `client_credentials_filepath`.
+- `realm_name` - (Required) The name of the Realm to provision the Application for.
+- `group_id` - (Required) Server defined unique identifier for the group to provision role mappings for.
+- `application_role` (Optional) An application role to map to members of the group.
+- `realm_role` (Optional) Configuration for mapping a realm role to members of a group.
 
 ### Application Role Schema
 
-* `role_id` - (Required) Service defined unique identifier for the application role.
-* `application_id` - (Required) The application ID associated with the application role.
-* `role_name` - (Required) User defined unique identifier for the application scoped role.
+- `role_id` - (Required) Service defined unique identifier for the application role.
+- `application_id` - (Required) The application ID associated with the application role.
+- `role_name` - (Required) User defined unique identifier for the application scoped role.
 
 ### Realm Role Schema
 
-* `role_id` - (Required) Service defined unique identifier for the realm role.
-* `realm_id` - (Required) The `role_realm_id` value for a `tozny_realm_role` resource.
-* `role_name` - (Required) User defined unique identifier for the realm scoped role.
+- `role_id` - (Required) Service defined unique identifier for the realm role.
+- `realm_id` - (Required) The `role_realm_id` value for a `tozny_realm_role` resource.
+- `role_name` - (Required) User defined unique identifier for the realm scoped role.
 
 ## Attribute Reference
 
-* `id` - Unique Terraform generated identifier for this set of role mappings for the given group.
+- `id` - Unique Terraform generated identifier for this set of role mappings for the given group.

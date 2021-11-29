@@ -8,7 +8,7 @@ Resource for provisioning a TozID Realm, the primary top level resource for all 
 # Include the Tozny Terraform provider
 provider "tozny" {
   api_endpoint = "https://dev.e3db.com"
-  account_username = "test+${random_string.account_username_salt.result}@tozny.com"
+  account_username = "test-emails-group+${random_string.account_username_salt.result}@tozny.com"
 }
 
 # Generate a random string for use in creating

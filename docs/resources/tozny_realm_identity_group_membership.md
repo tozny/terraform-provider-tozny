@@ -5,11 +5,12 @@ Resource to manage the group membership of a tozny identity
 This resource requires that the account username and password be supplied to the provider either via explicit provider settings or file based credentials. In addition you must have the client ID of the identity you wish to manage and the IDs of existing groups which should they should get associated with.
 
 ## Example Usage
+
 ```hcl
 # Include the Tozny Terraform provider
 provider "tozny" {
   api_endpoint = "http://platform.local.tozny.com:8000"
-  account_username = "test+${random_string.account_username_salt.result}@tozny.com"
+  account_username = "test-emails-group+${random_string.account_username_salt.result}@tozny.com"
 }
 
 # Generate a random string for use in creating
@@ -136,11 +137,12 @@ resource "tozny_realm_identity_group_membership" "eg_membership" {
 
 ### Top-Level Arguments
 
-* `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the Terraform provider to use when setting default groups. Omit if using `client_credentials_config`.
-* `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when setting default groups. Omit if using `client_credentials_filepath`.
-* `realm_name` - (Required) The name of the realm the identity is part of.
-* `identity_id` - (Required) The Tozny ID (Client ID) of the identity to map to join with the groups in group_ids.
-* `group_ids` - (Required) A list of the service defined unique identifiers for the groups the identity should get joined to.
+- `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the Terraform provider to use when setting default groups. Omit if using `client_credentials_config`.
+- `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when setting default groups. Omit if using `client_credentials_filepath`.
+- `realm_name` - (Required) The name of the realm the identity is part of.
+- `identity_id` - (Required) The Tozny ID (Client ID) of the identity to map to join with the groups in group_ids.
+- `group_ids` - (Required) A list of the service defined unique identifiers for the groups the identity should get joined to.
 
 ## Attribute Reference
-* `id` - Unique ID for referencing this user-group state.
+
+- `id` - Unique ID for referencing this user-group state.

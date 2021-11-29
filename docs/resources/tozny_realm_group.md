@@ -5,11 +5,12 @@ Resource for provisioning a TozID Group.
 This resource requires that the account username and password be supplied to the provider either via explicit provider settings or file based credentials.
 
 ## Example Usage
+
 ```hcl
 # Include the Tozny Terraform provider
 provider "tozny" {
   api_endpoint = "http://platform.local.tozny.com:8000"
-  account_username = "test+${random_string.account_username_salt.result}@tozny.com"
+  account_username = "test-emails-group+${random_string.account_username_salt.result}@tozny.com"
 }
 
 # Generate a random string for use in creating
@@ -65,12 +66,12 @@ resource "tozny_realm_group" "my_first_group" {
 
 ### Top-Level Arguments
 
-* `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the Terraform provider to use when provisioning this group. Omit if using `client_credentials_config`.
-* `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when provisioning this group. Omit if using `client_credentials_filepath`.
-* `group_id` - (Computed) Service defined unique identifier for the group.
-* `realm_name` - (Required) The name of the realm with which to associate the group.
-* `name` - (Required) User defined name for the group.
+- `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the Terraform provider to use when provisioning this group. Omit if using `client_credentials_config`.
+- `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when provisioning this group. Omit if using `client_credentials_filepath`.
+- `group_id` - (Computed) Service defined unique identifier for the group.
+- `realm_name` - (Required) The name of the realm with which to associate the group.
+- `name` - (Required) User defined name for the group.
 
 ## Attribute Reference
 
-* `id` - Unique ID of the provisioned group.
+- `id` - Unique ID of the provisioned group.
