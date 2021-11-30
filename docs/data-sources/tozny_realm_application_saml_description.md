@@ -5,11 +5,12 @@ Data Source for retrieving and persisting to disk the SAML description XML docum
 This Data Source requires that the account username and password be supplied to the provider either via explicit provider settings or file based credentials.
 
 ## Example Usage
+
 ```hcl
 # Include the Tozny Terraform provider
 provider "tozny" {
   api_endpoint = "http://platform.local.tozny.com:8000"
-  account_username = "test+${random_string.account_username_salt.result}@tozny.com"
+  account_username = "test-emails-group+${random_string.account_username_salt.result}@tozny.com"
 }
 
 # Generate a random string for use in creating
@@ -138,14 +139,14 @@ data "tozny_realm_application_saml_description" "saml_xml_description" {
 
 ### Top-Level Arguments
 
-* `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the Terraform provider to use when fetching this application's SAML description. Omit if using `client_credentials_config`.
-* `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when fetching this application's SAML description. Omit if using `client_credentials_filepath`.
-* `description` - (Computed) The SAML description contents from TozID
-* `application_id` - (Required) The application ID to retrieve the SAML description secret for.
-* `realm_name` - (Required) The name of the realm the application is associated with.
-* `format` - (Required) The format of the description to retrieve. Valid values are `saml-idp-descriptor`, `keycloak-saml`, `saml-sp-descriptor`, and `keycloak-saml-subsystem`.
-* `description_save_filepath` - (Required) The filepath to save the SAML description to.
+- `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the Terraform provider to use when fetching this application's SAML description. Omit if using `client_credentials_config`.
+- `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when fetching this application's SAML description. Omit if using `client_credentials_filepath`.
+- `description` - (Computed) The SAML description contents from TozID
+- `application_id` - (Required) The application ID to retrieve the SAML description secret for.
+- `realm_name` - (Required) The name of the realm the application is associated with.
+- `format` - (Required) The format of the description to retrieve. Valid values are `saml-idp-descriptor`, `keycloak-saml`, `saml-sp-descriptor`, and `keycloak-saml-subsystem`.
+- `description_save_filepath` - (Required) The filepath to save the SAML description to.
 
 ## Attribute Reference
 
-* `id` - Terraform defined unique id for the data source.
+- `id` - Terraform defined unique id for the data source.

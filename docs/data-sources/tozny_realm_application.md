@@ -10,7 +10,7 @@ This resource requires that the account username and password be supplied to the
 # Include the Tozny Terraform provider
 provider "tozny" {
   api_endpoint = "http://platform.local.tozny.com:8000"
-  account_username = "test+${random_string.account_username_salt.result}@tozny.com"
+  account_username = "test-emails-group+${random_string.account_username_salt.result}@tozny.com"
 }
 
 # Generate a random string for use in creating
@@ -105,42 +105,42 @@ data "tozny_realm_application" "account_application" {
 
 ### Top-Level Arguments
 
-* `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the provider to use when populating data in this data source. For this data source either this value or both `account_username` and `account_password` must be set on the provider. Omit if using `client_credentials_config`.
-* `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when populating data in this data source. For this data source either this value or both `account_username` and `account_password` must be set on the provider. Omit if using `client_credentials_filepath`.
-* `realm_name` - (Required) The name of the Realm where the application is defined.
-* `client_id` - (Required) The external id for clients to reference when communicating with this application. Used as the primary identifier to populate the client data.
+- `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the provider to use when populating data in this data source. For this data source either this value or both `account_username` and `account_password` must be set on the provider. Omit if using `client_credentials_config`.
+- `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when populating data in this data source. For this data source either this value or both `account_username` and `account_password` must be set on the provider. Omit if using `client_credentials_filepath`.
+- `realm_name` - (Required) The name of the Realm where the application is defined.
+- `client_id` - (Required) The external id for clients to reference when communicating with this application. Used as the primary identifier to populate the client data.
 
 ## Attribute Reference
 
-* `id` - Server defined unique identifier for the Application (alias of `application_id`).
-* `application_id` - Server defined unique identifier for the Application.
-* `name` - Human readable/reference-able name for the application.
-* `protocol` - What protocol (e.g. OpenIDConnect or SAML) is used to authenticate with the application. Valid values are `openid-connect`, `saml`.
-* `active` - Whether this consumer is allowed to authenticate and authorize identities.
-* `oidc_settings` - Settings for an OIDC protocol based application. Only one of `oidc_settings` or `saml_settings` will be specified.
-* `saml_settings` - Settings for a SAML protocol based application. Only one of `saml_settings` or `oidc_settings` will be specified.
+- `id` - Server defined unique identifier for the Application (alias of `application_id`).
+- `application_id` - Server defined unique identifier for the Application.
+- `name` - Human readable/reference-able name for the application.
+- `protocol` - What protocol (e.g. OpenIDConnect or SAML) is used to authenticate with the application. Valid values are `openid-connect`, `saml`.
+- `active` - Whether this consumer is allowed to authenticate and authorize identities.
+- `oidc_settings` - Settings for an OIDC protocol based application. Only one of `oidc_settings` or `saml_settings` will be specified.
+- `saml_settings` - Settings for a SAML protocol based application. Only one of `saml_settings` or `oidc_settings` will be specified.
 
 ### OIDC Settings Schema
 
-* `allowed_origins` - The list of network locations that are allowed to be used by clients when accessing this application.
-* `access_type` - The OIDC access type.
-* `root_url` - The URL to append to any relative URLs.
-* `standard_flow_enabled` - Whether the OIDC standard flow is enabled.
-* `implicit_flow_enabled` - Whether the OIDC implicit flow is enabled.
-* `direct_access_grants_enabled` - Whether for OIDC flows direct access grants are enabled.
-* `base_url` - The OIDC base URL.
+- `allowed_origins` - The list of network locations that are allowed to be used by clients when accessing this application.
+- `access_type` - The OIDC access type.
+- `root_url` - The URL to append to any relative URLs.
+- `standard_flow_enabled` - Whether the OIDC standard flow is enabled.
+- `implicit_flow_enabled` - Whether the OIDC implicit flow is enabled.
+- `direct_access_grants_enabled` - Whether for OIDC flows direct access grants are enabled.
+- `base_url` - The OIDC base URL.
 
 ### SAML Settings Schema
 
-* `allowed_origins` - The list of network locations that are allowed to be used by clients when accessing this application.
-* `default_endpoint` - URL used for every binding to both the SP's Assertion Consumer and Single Logout Services. This can be individually overridden for each binding and service.
-* `include_authn_statement` - Whether to include the Authn statement.
-* `include_one_time_use_condition` - Whether to include the one time use condition.
-* `sign_documents` - Whether to sign documents.
-* `sign_assertions` - Whether to sign assertions.
-* `client_signature_required` - Whether client signature is required.
-* `force_post_binding` - Whether to force POST binding.
-* `force_name_id_format` - Whether to force name ID format.
-* `name_id_format` - The name ID format
-* `idp_initiated_sso_url_name` - The IDP initiated SSO URL name.
-* `assertion_consumer_service_post_binding_url` - The assertion consumer service post bind URL.
+- `allowed_origins` - The list of network locations that are allowed to be used by clients when accessing this application.
+- `default_endpoint` - URL used for every binding to both the SP's Assertion Consumer and Single Logout Services. This can be individually overridden for each binding and service.
+- `include_authn_statement` - Whether to include the Authn statement.
+- `include_one_time_use_condition` - Whether to include the one time use condition.
+- `sign_documents` - Whether to sign documents.
+- `sign_assertions` - Whether to sign assertions.
+- `client_signature_required` - Whether client signature is required.
+- `force_post_binding` - Whether to force POST binding.
+- `force_name_id_format` - Whether to force name ID format.
+- `name_id_format` - The name ID format
+- `idp_initiated_sso_url_name` - The IDP initiated SSO URL name.
+- `assertion_consumer_service_post_binding_url` - The assertion consumer service post bind URL.

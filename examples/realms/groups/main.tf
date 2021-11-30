@@ -16,7 +16,7 @@ terraform {
 # Include the Tozny Terraform provider
 provider "tozny" {
   api_endpoint = "http://platform.local.tozny.com:8000"
-  account_username = "test+${random_string.account_username_salt.result}@tozny.com"
+  account_username = "test-emails-group+${random_string.account_username_salt.result}@tozny.com"
 }
 
 # Generate a random string for use in creating

@@ -10,7 +10,7 @@ This resource requires that the account username and password be supplied to the
 # Include the Tozny Terraform provider
 provider "tozny" {
   api_endpoint = "http://platform.local.tozny.com:8000"
-  account_username = "test+${random_string.account_username_salt.result}@tozny.com"
+  account_username = "test-emails-group+${random_string.account_username_salt.result}@tozny.com"
 }
 
 # Generate a random string for use in creating
@@ -70,14 +70,14 @@ resource "tozny_client_registration_token" "realm_registration_token" {
 
 ### Top-Level Arguments
 
-* `name` - (Required)Service defined unique identifier for the realm.
-* `allowed_registration_client_types` - (Required) The client types that can be registered using the token. Valid types are `general`, `identity`, and `broker`. Must specify at least one.
-* `enabled` - (Optional) Whether the clients can be registered using this token. Defaults to true.
-* `one_time_use` - (Optional) Whether the token is only valid for registering a single client. Defaults to false.
-* `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the provider to use when provisioning this resource. For this resource either this value or both `account_username` and `account_password` must be set on the provider. Omit if using `client_credentials_config`.
-* `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when provisioning this resource. For this resource either this value or both `account_username` and `account_password` must be set on the provider. Omit if using `client_credentials_filepath`.
-* `token` - (Computed) Client registration token.
+- `name` - (Required)Service defined unique identifier for the realm.
+- `allowed_registration_client_types` - (Required) The client types that can be registered using the token. Valid types are `general`, `identity`, and `broker`. Must specify at least one.
+- `enabled` - (Optional) Whether the clients can be registered using this token. Defaults to true.
+- `one_time_use` - (Optional) Whether the token is only valid for registering a single client. Defaults to false.
+- `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the provider to use when provisioning this resource. For this resource either this value or both `account_username` and `account_password` must be set on the provider. Omit if using `client_credentials_config`.
+- `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when provisioning this resource. For this resource either this value or both `account_username` and `account_password` must be set on the provider. Omit if using `client_credentials_filepath`.
+- `token` - (Computed) Client registration token.
 
 ## Attribute Reference
 
-* `id` - Unique ID of the provisioned Client registration token.
+- `id` - Unique ID of the provisioned Client registration token.

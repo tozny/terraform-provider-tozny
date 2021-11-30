@@ -10,7 +10,7 @@ This resource requires that the account username and password be supplied to the
 # Include the Tozny Terraform provider
 provider "tozny" {
   api_endpoint = "http://platform.local.tozny.com:8000"
-  account_username = "test+${random_string.account_username_salt.result}@tozny.com"
+  account_username = "test-emails-group+${random_string.account_username_salt.result}@tozny.com"
 }
 
 # Generate a random string for use in creating
@@ -84,17 +84,17 @@ resource "tozny_realm_broker_identity" "broker_identity" {
 
 ### Top-Level Arguments
 
-* `client_registration_token` - (Required) Token to use when registering the Identity's client.
-* `realm_name` - (Required) The name of the Realm to register the brokering Identity for
-* `name` - (Required) User defined name for the brokering Identity
-* `persist_credentials_to` - (Optional) Where to persist the generated credentials. Either "file" or "terraform". Default: file
-* `broker_identity_credentials_save_filepath` - (Optional) The filepath to persist the provisioned Identities credentials to. Required when `persist_credentials_to` is set to "file"
-* `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the provider to use when provisioning this resource. For this resource either this value or both `account_username` and `account_password` must be set on the provider. Omit if using `client_credentials_config`.
-* `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when provisioning this resource. For this resource either this value or both `account_username` and `account_password` must be set on the provider. Omit if using `client_credentials_filepath`.
-* `identity_client_id` - (Computed) Server defined unique identifier for the brokering Identity's client.
-* `credentials` - (Computed) A JSON representation of the generated credentials, only populated when `persist_credentials_to` is set to "terraform"
+- `client_registration_token` - (Required) Token to use when registering the Identity's client.
+- `realm_name` - (Required) The name of the Realm to register the brokering Identity for
+- `name` - (Required) User defined name for the brokering Identity
+- `persist_credentials_to` - (Optional) Where to persist the generated credentials. Either "file" or "terraform". Default: file
+- `broker_identity_credentials_save_filepath` - (Optional) The filepath to persist the provisioned Identities credentials to. Required when `persist_credentials_to` is set to "file"
+- `client_credentials_filepath` - (Optional) The filepath to Tozny client credentials for the provider to use when provisioning this resource. For this resource either this value or both `account_username` and `account_password` must be set on the provider. Omit if using `client_credentials_config`.
+- `client_credentials_config` - (Optional) A JSON string containing Tozny client credentials for the provider to use when provisioning this resource. For this resource either this value or both `account_username` and `account_password` must be set on the provider. Omit if using `client_credentials_filepath`.
+- `identity_client_id` - (Computed) Server defined unique identifier for the brokering Identity's client.
+- `credentials` - (Computed) A JSON representation of the generated credentials, only populated when `persist_credentials_to` is set to "terraform"
 
 ## Attribute Reference
 
-* `id` - Server defined unique identifier for the brokering Identity's client.
-* `credentials` - A JSON representation of the generated credentials, only populated when `persist_credentials_to` is set to "terraform"
+- `id` - Server defined unique identifier for the brokering Identity's client.
+- `credentials` - A JSON representation of the generated credentials, only populated when `persist_credentials_to` is set to "terraform"
