@@ -251,8 +251,8 @@ github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/tozny/e3db-clients-go v0.0.159/go.mod h1:yNs03BRVrLCEZzRze0CjYkrMaC5SLIxPn0li1ZHHVW4=
-github.com/tozny/e3db-clients-go v0.0.198-0.20211129172200-06b838d3685d h1:FyqPT86h+POERGMDgeAFZQd4YBdIKYuv92kBOyGirMw=
-github.com/tozny/e3db-clients-go v0.0.198-0.20211129172200-06b838d3685d/go.mod h1:yNs03BRVrLCEZzRze0CjYkrMaC5SLIxPn0li1ZHHVW4=
+github.com/tozny/e3db-clients-go v0.0.198 h1:Zq+x30O568LYKRSIBrrUHShtLe//nQETObK5BvBEnVQ=
+github.com/tozny/e3db-clients-go v0.0.198/go.mod h1:yNs03BRVrLCEZzRze0CjYkrMaC5SLIxPn0li1ZHHVW4=
 github.com/tozny/e3db-go/v2 v2.5.3 h1:s60gvKttAEXxneWvbqXfGkarrBbJ2qhA2KOQ2q7ArKc=
 github.com/tozny/e3db-go/v2 v2.5.3/go.mod h1:xVqZVWJRaMcrTQIxnDu8edSEQIrzph9QrvOOrxdyynE=
 github.com/tozny/utils-go v0.0.51 h1:2BG0JFK5Hcz6Q2FoXOMlc3iivPtnYAPtWMDJIKxlGok=

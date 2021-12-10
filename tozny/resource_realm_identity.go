@@ -18,6 +18,7 @@ func resourceRealmIdentity() *schema.Resource {
 		ReadContext:   resourceRealmIdentityRead,
 		DeleteContext: resourceRealmIdentityDelete,
 		UpdateContext: resourceRealmIdentityUpdate,
+
 		Schema: map[string]*schema.Schema{
 			"client_credentials_filepath": {
 				Description:   "The filepath to Tozny client credentials for the Terraform provider to use when provisioning this realm provider.",
@@ -130,7 +131,7 @@ func resourceRealmIdentityCreate(ctx context.Context, d *schema.ResourceData, m 
 
 func resourceRealmIdentityRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
-	// There is nothing to really update for an identity at this time, so implement as a noop.
+	// There is nothing to read for an identity at this time, so implement as a noop.
 	return diags
 }
 
