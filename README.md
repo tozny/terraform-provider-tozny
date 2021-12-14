@@ -300,11 +300,25 @@ make install-mac && rm .terraform.lock.hcl && rm -rf .terraform/ && terraform in
 
 - [Connect to Tozny's github organization](https://registry.terraform.io/publish/provider)
 
-- [Generate GPG keys](<https://support.yubico.com/support/solutions/articles/15000006420-using-your-yubikey-with-openpgp#Generating_Keys_externally_from_the_YubiKey_(Recommended)4sn2r>) and [provide public GPG key to Terraform over email](https://www.terraform.io/guides/terraform-provider-development-program.html#3-verify) to use in signing and verifying distribution binaries
+- [Generate GPG keys](<https://support.yubico.com/support/solutions/articles/15000006420-using-your-yubikey-with-openpgp#Generating_Keys_externally_from_the_YubiKey_(Recommended)4sn2r>)
 
 - [Install goreleaser](https://goreleaser.com/install/) if doing local based release artifact creation.
 
 - Github [personal action token(https://github.com/settings/tokens/new) with `public_repo` scope if doing local based release artifact creation
+
+### Adding a new Publisher
+
+- Provide your public gpg key to add to the Tozny Terraform GPG Signing Keys
+
+```
+ gpg --armor --export "<KeyID>"
+```
+
+- Verify that your key exists within the Tozny Namespace(https://registry.terraform.io/settings/gpg-keys)
+
+### Updating Documentation
+
+Prior to releasing, make sure to update all instances of the previous released version on the example documentation and Makefile to the new version.
 
 ### Documentation
 
@@ -313,10 +327,10 @@ When publishing new releases, be sure to add, update, delete and [verify](https:
 ### Tagging
 
 Tag and update the provider & repository version number following [Semantic versioning](https://semver.org).
+**Make sure the Makefile has been updated with the new release version.**
 
 ```bash
-git tag vX.Y.Z
-git push origin vX.Y.Z
+make version
 ```
 
 ### Local Release Artifact Creation
@@ -330,6 +344,29 @@ Build binaries of the provider for all common platforms and architectures:
 
 ```bash
 make release
+```
+
+### Verify Release
+
+After you have successfully built, and released the terraform provider. Make sure to delete your .terraform files and run
+
+```
+terraform init
+```
+
+You should see that the tozny/tozny was self signed. If it does not say this, we need to re-release a signed version of the release, but first verify your gpg key is registered in the tozny terraform provider.
+
+```
+Initializing the backend...
+
+Initializing provider plugins...
+- Finding tozny/tozny versions matching "0.16.0"...
+- Finding latest version of hashicorp/random...
+- Installing tozny/tozny v0.16.0...
+- Installed tozny/tozny v0.16.0 (self-signed, key ID 16B47290885B0598)
+- Installing hashicorp/random v3.1.0...
+- Installed hashicorp/random v3.1.0 (signed by HashiCorp)
+
 ```
 
 ### Remote Release Artifact Creation
