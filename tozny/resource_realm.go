@@ -15,6 +15,7 @@ func resourceRealm() *schema.Resource {
 		CreateContext: resourceRealmCreate,
 		ReadContext:   resourceRealmRead,
 		DeleteContext: resourceRealmDelete,
+		UpdateContext: resourceRealmUpdate,
 		Schema: map[string]*schema.Schema{
 			"realm_id": {
 				Description: "Service defined unique identifier for the realm.",
@@ -107,14 +108,12 @@ func resourceRealm() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
-				ForceNew:    true,
 			},
 			"tozid_federation_enabled": {
 				Description: "Flag to enable TozID Federation for the Realm.",
 				Type:        schema.TypeBool,
 				Default:     false,
 				Optional:    true,
-				ForceNew:    true,
 			},
 		},
 	}
@@ -224,6 +223,30 @@ func resourceRealmDelete(ctx context.Context, d *schema.ResourceData, m interfac
 	}
 
 	d.SetId("")
+
+	return diags
+}
+
+func resourceRealmUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+	toznySDK, err := MakeToznySDK(d, m)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	if d.HasChanges("mpc_enabled", "tozid_federation_enabled") {
+		federation_setting := d.Get("tozid_federation_enabled").(bool)
+		mpc_setting := d.Get("mpc_enabled").(bool)
+		err = toznySDK.RealmSettingsUpdate(ctx, d.Get("realm_name").(string), identityClient.RealmSettingsUpdateRequest{
+			MPCEnabled:             &mpc_setting,
+			TozIDFederationEnabled: &federation_setting,
+		})
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set("mpc_enabled", d.Get("mpc_enabled"))
+		d.Set("tozid_federation_enabled", d.Get("tozid_federation_enabled"))
+	}
 
 	return diags
 }
