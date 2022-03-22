@@ -1,6 +1,6 @@
 # tozny_realm_group Resource
 
-Resource for provisioning a TozID Group.
+Resource for provisioning a TozID Group with optional configuration such as attaching an Access policy to enable multi-party control.
 
 This resource requires that the account username and password be supplied to the provider either via explicit provider settings or file based credentials.
 
@@ -49,6 +49,18 @@ resource "tozny_realm" "my_organizations_realm" {
   client_credentials_filepath = local.tozny_client_credentials_filepath
   realm_name = random_string.random_realm_name.result
   sovereign_name = "Administrator"
+  mpc_enabled = true
+}
+
+# A resource to create a Role for approving access requests that is attached to the Group's access policy.
+resource "tozny_realm_role" "mpc_approval_role" {
+  depends_on = [
+    tozny_realm.my_organizations_realm,
+  ]
+  client_credentials_filepath = local.tozny_client_credentials_filepath
+  realm_name                = tozny_realm.my_organizations_realm.realm_name
+  name                      = "approving_role"
+  description               = "a role to approve access requests in a multi-party controlled group"
 }
 
 resource "tozny_realm_group" "my_first_group" {
@@ -58,6 +70,15 @@ resource "tozny_realm_group" "my_first_group" {
   client_credentials_filepath = local.tozny_client_credentials_filepath
   name = "My First Group"
   realm_name = tozny_realm.my_organizations_realm.realm_name
+  // Only one access policy can be attached to a group at this time
+  access_policy {
+    approval_role_ids               = [tozny_realm_role.mpc_approval_role.realm_role_id]
+    required_approvals              = 3
+    maximum_access_duration_seconds = 1600
+    plugin_type                     = "jira" // Tozny currently only supports "jira"
+    plugin_id                       = "pluginID"
+    plugin_mpc_flow_source          = "pluginSource"
+  }
 }
 
 ```
@@ -71,6 +92,16 @@ resource "tozny_realm_group" "my_first_group" {
 - `group_id` - (Computed) Service defined unique identifier for the group.
 - `realm_name` - (Required) The name of the realm with which to associate the group.
 - `name` - (Required) User defined name for the group.
+- `access_policy` - (Optional) The list of access policies to attach to the group.
+
+### Access Policies Schema
+
+- `access_policy_id` - (Computed) Server generated Id for the access policy
+- `approval_role_ids` - (Required) The roles that can approve requests for groups with this access policy.
+- `required_approvals` - (Optional) The number of approvals required for multi-party control of this group.
+- `maximum_access_duration_seconds` - (Optional) The supported plugin type for the access policy (e.g. "jira").
+- `plugin_type` - (Optional) The ID of the plugin.
+- `plugin_mpc_flow_source` - (Optional) The ID of the source that managed MPC (e.g. the ID of a Jira Board).
 
 ## Attribute Reference
 
