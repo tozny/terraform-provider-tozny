@@ -162,9 +162,9 @@ func resourceRealmCreate(ctx context.Context, d *schema.ResourceData, m interfac
 		customForgetPasswordLinkStr := customForgetPasswordLink.(string)
 		settingsUpdateRequest.ForgotPasswordCustomLink = &customForgetPasswordLinkStr
 	}
-	customForgetPasswordText := d.Get("forgot_password_custom_text")
+	customForgetPasswordText, textExists := d.GetOk("forgot_password_custom_text")
 
-	if exists {
+	if textExists {
 		customForgetPasswordTextStr := customForgetPasswordText.(string)
 		settingsUpdateRequest.ForgotPasswordCustomText = &customForgetPasswordTextStr
 	}
@@ -268,19 +268,15 @@ func resourceRealmUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 			MPCEnabled:             &mpc_setting,
 			TozIDFederationEnabled: &federation_setting,
 		}
-		customForgetPasswordLink, exists := d.GetOk("forgot_password_custom_link")
+		// Check if Forgot Password Link exists
+		customForgetPasswordLink := d.Get("forgot_password_custom_link")
+		customForgetPasswordLinkStr := customForgetPasswordLink.(string)
+		settingsUpdateRequest.ForgotPasswordCustomLink = &customForgetPasswordLinkStr
 
-		if exists {
-			customForgetPasswordLinkStr := customForgetPasswordLink.(string)
-			settingsUpdateRequest.ForgotPasswordCustomLink = &customForgetPasswordLinkStr
-		}
-
+		// Check if Forgot Password Custom Text exists
 		customForgetPasswordText := d.Get("forgot_password_custom_text")
-
-		if exists {
-			customForgetPasswordTextStr := customForgetPasswordText.(string)
-			settingsUpdateRequest.ForgotPasswordCustomText = &customForgetPasswordTextStr
-		}
+		customForgetPasswordTextStr := customForgetPasswordText.(string)
+		settingsUpdateRequest.ForgotPasswordCustomText = &customForgetPasswordTextStr
 
 		err = toznySDK.RealmSettingsUpdate(ctx, d.Get("realm_name").(string), settingsUpdateRequest)
 		if err != nil {
@@ -288,6 +284,9 @@ func resourceRealmUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 		}
 		d.Set("mpc_enabled", d.Get("mpc_enabled"))
 		d.Set("tozid_federation_enabled", d.Get("tozid_federation_enabled"))
+		d.Set("forgot_password_custom_text", d.Get("forgot_password_custom_text"))
+		d.Set("forgot_password_custom_link", d.Get("forgot_password_custom_link"))
+
 	}
 
 	return diags
