@@ -115,6 +115,16 @@ func resourceRealm() *schema.Resource {
 				Default:     false,
 				Optional:    true,
 			},
+			"forgot_password_custom_link": {
+				Description: "Link to custom forgot password page.",
+				Type:        schema.TypeString,
+				Optional:    true,
+			},
+			"forgot_password_custom_text": {
+				Description: "Text which will be used as a guidance for the offline password recovery flow.",
+				Type:        schema.TypeString,
+				Optional:    true,
+			},
 		},
 	}
 }
@@ -141,10 +151,25 @@ func resourceRealmCreate(ctx context.Context, d *schema.ResourceData, m interfac
 
 	mpcEnabled := d.Get("mpc_enabled").(bool)
 	tozidFederation := d.Get("tozid_federation_enabled").(bool)
-	err = toznySDK.RealmSettingsUpdate(ctx, d.Get("realm_name").(string), identityClient.RealmSettingsUpdateRequest{
+
+	settingsUpdateRequest := identityClient.RealmSettingsUpdateRequest{
 		MPCEnabled:             &mpcEnabled,
 		TozIDFederationEnabled: &tozidFederation,
-	})
+	}
+	customForgetPasswordLink, exists := d.GetOk("forgot_password_custom_link")
+
+	if exists {
+		customForgetPasswordLinkStr := customForgetPasswordLink.(string)
+		settingsUpdateRequest.ForgotPasswordCustomLink = &customForgetPasswordLinkStr
+	}
+	customForgetPasswordText, textExists := d.GetOk("forgot_password_custom_text")
+
+	if textExists {
+		customForgetPasswordTextStr := customForgetPasswordText.(string)
+		settingsUpdateRequest.ForgotPasswordCustomText = &customForgetPasswordTextStr
+	}
+	err = toznySDK.RealmSettingsUpdate(ctx, d.Get("realm_name").(string), settingsUpdateRequest)
+
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -234,18 +259,34 @@ func resourceRealmUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 		return diag.FromErr(err)
 	}
 
-	if d.HasChanges("mpc_enabled", "tozid_federation_enabled") {
+	if d.HasChanges("mpc_enabled", "tozid_federation_enabled", "forgot_password_custom_link", "forgot_password_custom_text") {
+
 		federation_setting := d.Get("tozid_federation_enabled").(bool)
 		mpc_setting := d.Get("mpc_enabled").(bool)
-		err = toznySDK.RealmSettingsUpdate(ctx, d.Get("realm_name").(string), identityClient.RealmSettingsUpdateRequest{
+
+		settingsUpdateRequest := identityClient.RealmSettingsUpdateRequest{
 			MPCEnabled:             &mpc_setting,
 			TozIDFederationEnabled: &federation_setting,
-		})
+		}
+		// Check if Forgot Password Link exists
+		customForgetPasswordLink := d.Get("forgot_password_custom_link")
+		customForgetPasswordLinkStr := customForgetPasswordLink.(string)
+		settingsUpdateRequest.ForgotPasswordCustomLink = &customForgetPasswordLinkStr
+
+		// Check if Forgot Password Custom Text exists
+		customForgetPasswordText := d.Get("forgot_password_custom_text")
+		customForgetPasswordTextStr := customForgetPasswordText.(string)
+		settingsUpdateRequest.ForgotPasswordCustomText = &customForgetPasswordTextStr
+
+		err = toznySDK.RealmSettingsUpdate(ctx, d.Get("realm_name").(string), settingsUpdateRequest)
 		if err != nil {
 			return diag.FromErr(err)
 		}
 		d.Set("mpc_enabled", d.Get("mpc_enabled"))
 		d.Set("tozid_federation_enabled", d.Get("tozid_federation_enabled"))
+		d.Set("forgot_password_custom_text", d.Get("forgot_password_custom_text"))
+		d.Set("forgot_password_custom_link", d.Get("forgot_password_custom_link"))
+
 	}
 
 	return diags
