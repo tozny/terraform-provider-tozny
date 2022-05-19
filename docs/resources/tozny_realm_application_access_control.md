@@ -17,7 +17,7 @@ terraform {
       # for Tozny registry.terraform.io/tozny
       source = "tozny/tozny"
       # Pin Tozny provider version
-      version = ">=0.20.0"
+      version = ">=0.21.0"
     }
   }
 }
