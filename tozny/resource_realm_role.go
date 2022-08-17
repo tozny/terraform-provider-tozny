@@ -117,7 +117,7 @@ func resourceRealmRoleCreate(ctx context.Context, d *schema.ResourceData, m inte
 
 	// Adding attributes (if specified) as part of the realm role creation
 	realmRoleID := realmRole.ID
-	if roleAttributes := attributesFromState(d); len(roleAttributes) != 0 {
+	if roleAttributes := attributesFromState(d); roleAttributes != nil && len(roleAttributes) > 0 {
 		role.Attributes = roleAttributes
 		updateRealmRoleParams := identityClient.UpdateRealmRoleRequest{
 			RoleID:    realmRoleID,
