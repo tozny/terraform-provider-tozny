@@ -13,6 +13,7 @@ import (
 func resourceRealmRole() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceRealmRoleCreate,
+		UpdateContext: resourceRealmRoleUpdate,
 		ReadContext:   resourceRealmRoleRead,
 		DeleteContext: resourceRealmRoleDelete,
 		Schema: map[string]*schema.Schema{
@@ -49,7 +50,6 @@ func resourceRealmRole() *schema.Resource {
 				Description: "Human readable description for the realm role.",
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
 			},
 			"realm_role_id": {
 				Description: "Server defined unique identifier for the realm role.",
@@ -67,20 +67,17 @@ func resourceRealmRole() *schema.Resource {
 				Description: "Arbitrary string-string key value pairs.",
 				Type:        schema.TypeList,
 				Optional:    true,
-				ForceNew:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"key": {
 							Description: "The key to use for the attribute",
 							Type:        schema.TypeString,
 							Required:    true,
-							ForceNew:    true,
 						},
 						"values": {
 							Description: "A list of string values",
 							Type:        schema.TypeList,
 							Required:    true,
-							ForceNew:    true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -134,6 +131,42 @@ func resourceRealmRoleCreate(ctx context.Context, d *schema.ResourceData, m inte
 	d.Set("realm_role_id", realmRoleID)
 
 	d.SetId(realmRoleID)
+
+	return diags
+}
+
+func resourceRealmRoleUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	toznySDK, err := MakeToznySDK(d, m)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	if d.HasChanges("description", "attribute") {
+		role := identityClient.Role{
+			ID:          d.Get("realm_role_id").(string),
+			Name:        d.Get("name").(string),
+			Description: d.Get("description").(string),
+			Attributes:  attributesFromState(d),
+		}
+
+		var updatedRealmRole *identityClient.Role
+		if role.Attributes != nil && len(role.Attributes) > 0 {
+			updateRealmRoleParams := identityClient.UpdateRealmRoleRequest{
+				RoleID:    role.ID,
+				RealmName: strings.ToLower(d.Get("realm_name").(string)),
+				Role:      role,
+			}
+			updatedRealmRole, err = toznySDK.UpdateRealmRole(ctx, updateRealmRoleParams)
+			if err != nil {
+				return diag.FromErr(err)
+			}
+		}
+
+		d.Set("description", updatedRealmRole.Description)
+		d.Set("attribute", attributesToState(updatedRealmRole.Attributes))
+	}
 
 	return diags
 }
