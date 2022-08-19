@@ -40,6 +40,7 @@ override.tf.json
 
 # Development environments
 .vscode
+.idea
 
 # Helpers
 cycle/
