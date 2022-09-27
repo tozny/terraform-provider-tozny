@@ -64,6 +64,7 @@ func Provider() *schema.Provider {
 			"tozny_primary_realm_federation":         resourcePrimaryRealmFederation(),
 			"tozny_realm_application_access_control": resourceRealmApplicationAccessControl(),
 			"tozny_pam_jira_plugin":                  resourcePAMJiraPlugin(),
+			"tozny_identity_provider":                resourceIdentityProvider(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"tozny_realm_application":                  dataSourceRealmApplication(),
