@@ -24,8 +24,8 @@ provider "tozny" {
 # for federating identities for a realm
 resource "tozny_identity_provider" "azure_identity_provider" {
   realm_name                = "localtest"
-  provider_id               = "oidc"
   display_name              = "Azure AD"
+  alias                     = "azure-ad"
   enabled                   = true
   config {
     authorization_url       = "https://test-auth-url.com"
@@ -33,5 +33,6 @@ resource "tozny_identity_provider" "azure_identity_provider" {
     client_auth_method      = "client_secret_post"
     client_id               = "sdsdscscscdvdfdfdfdf"
     client_secret           = "asdasdsaxcdscdcddvdvfv"
+    default_scope           = "email profile openid"
   }
 }

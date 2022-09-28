@@ -32,12 +32,6 @@ func resourceIdentityProvider() *schema.Resource {
 				Sensitive:     true,
 				ConflictsWith: []string{"client_credentials_filepath"},
 			},
-			"provider_id": {
-				Description: "Service defined unique identifier for the provider.",
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-			},
 			"realm_name": {
 				Description: "The name of the realm to associate the provider with.",
 				Type:        schema.TypeString,
@@ -46,6 +40,12 @@ func resourceIdentityProvider() *schema.Resource {
 			},
 			"display_name": {
 				Description: "User defined name for the provider.",
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+			},
+			"alias": {
+				Description: "User defined unique ID for the provider.",
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
@@ -94,9 +94,12 @@ func resourceIdentityProvider() *schema.Resource {
 							Default:     "client_secret_post",
 							Optional:    true,
 							ForceNew:    true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
+						},
+						"default_scope": {
+							Description: "Default scope.",
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
 						},
 					},
 				},
@@ -114,23 +117,28 @@ func resourceIdentityProviderCreate(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
+	realmName := d.Get("realm_name").(string)
+	configi := d.Get("config").([]interface{})[0].(map[string]interface{})
+	//fmt.Printf("%+v", configi)
+
 	providerConfig := map[string]interface{}{
-		"authorizationUrl": "https://test-auth-url.com",
-		"tokenUrl":         "https://test-auth-url.com",
-		"clientAuthMethod": "client_secret_post",
-		"clientId":         "adadadadadadadadadadadadad",
-		"clientSecret":     "aDAZCSFCCXVsdsdsffsfsfsff",
+		"authorizationUrl": configi["authorization_url"].(string),
+		"tokenUrl":         configi["token_url"].(string),
+		"clientAuthMethod": configi["client_auth_method"].(string),
+		"clientId":         configi["client_id"].(string),
+		"clientSecret":     configi["client_secret"].(string),
+		"defaultScope":     configi["default_scope"].(string),
 	}
 
 	createIdpRequest := identityClient.CreateIdentityProviderRequest{
 		ProviderId:  "oidc",
-		Alias:       "az-testing-terraform",
+		Alias:       d.Get("alias").(string),
 		Config:      providerConfig,
-		DisplayName: "Azure IdP Testing terraform",
+		DisplayName: d.Get("display_name").(string),
 		Enabled:     true,
 	}
 
-	err = toznySDK.CreateIdentityProvider(ctx, "localtest", createIdpRequest)
+	err = toznySDK.CreateIdentityProvider(ctx, realmName, createIdpRequest)
 
 	if err != nil {
 		return diag.FromErr(err)
