@@ -116,20 +116,16 @@ func resourceIdentityProviderCreate(ctx context.Context, d *schema.ResourceData,
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
 	realmName := d.Get("realm_name").(string)
-	configi := d.Get("config").([]interface{})[0].(map[string]interface{})
-	//fmt.Printf("%+v", configi)
-
+	config := d.Get("config").([]interface{})[0].(map[string]interface{})
 	providerConfig := map[string]interface{}{
-		"authorizationUrl": configi["authorization_url"].(string),
-		"tokenUrl":         configi["token_url"].(string),
-		"clientAuthMethod": configi["client_auth_method"].(string),
-		"clientId":         configi["client_id"].(string),
-		"clientSecret":     configi["client_secret"].(string),
-		"defaultScope":     configi["default_scope"].(string),
+		"authorizationUrl": config["authorization_url"].(string),
+		"tokenUrl":         config["token_url"].(string),
+		"clientAuthMethod": config["client_auth_method"].(string),
+		"clientId":         config["client_id"].(string),
+		"clientSecret":     config["client_secret"].(string),
+		"defaultScope":     config["default_scope"].(string),
 	}
-
 	createIdpRequest := identityClient.CreateIdentityProviderRequest{
 		ProviderId:  "oidc",
 		Alias:       d.Get("alias").(string),
@@ -137,9 +133,7 @@ func resourceIdentityProviderCreate(ctx context.Context, d *schema.ResourceData,
 		DisplayName: d.Get("display_name").(string),
 		Enabled:     true,
 	}
-
 	err = toznySDK.CreateIdentityProvider(ctx, realmName, createIdpRequest)
-
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -148,10 +142,26 @@ func resourceIdentityProviderCreate(ctx context.Context, d *schema.ResourceData,
 
 func resourceIdentityProviderRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
+	toznySDK, err := MakeToznySDK(d, m)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	return diags
 }
 
 func resourceIdentityProviderDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+
 	var diags diag.Diagnostics
+	toznySDK, err := MakeToznySDK(d, m)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	realmName := d.Get("realm_name").(string)
+	alias := d.Get("alias").(string)
+	err = toznySDK.DeleteIdentityProvider(ctx, realmName, alias)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	return diags
 }

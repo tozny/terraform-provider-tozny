@@ -28,8 +28,8 @@ resource "tozny_identity_provider" "azure_identity_provider" {
   alias                     = "azure-ad"
   enabled                   = true
   config {
-    authorization_url       = "https://test-auth-url.com"
-    token_url               = "https://test-auth-url.com"
+    authorization_url       = "https://test-eidp.com/auth"
+    token_url               = "https://test-eidp.com/token"
     client_auth_method      = "client_secret_post"
     client_id               = "sdsdscscscdvdfdfdfdf"
     client_secret           = "asdasdsaxcdscdcddvdvfv"
