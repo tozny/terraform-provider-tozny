@@ -137,6 +137,7 @@ func resourceIdentityProviderCreate(ctx context.Context, d *schema.ResourceData,
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	d.SetId(createIdpRequest.Alias)
 	return diags
 }
 
@@ -146,7 +147,13 @@ func resourceIdentityProviderRead(ctx context.Context, d *schema.ResourceData, m
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
+	realmName := d.Get("realm_name").(string)
+	alias := d.Get("alias").(string)
+	idpRepresentation, err := toznySDK.GetIdentityProvider(ctx, realmName, alias)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.Set("alias", idpRepresentation.Alias)
 	return diags
 }
 

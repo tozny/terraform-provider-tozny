@@ -36,3 +36,19 @@ resource "tozny_identity_provider" "azure_identity_provider" {
     default_scope           = "email profile openid"
   }
 }
+
+resource "tozny_identity_provider_mapper" "idp_role_mapper" {
+  depends_on = [
+    tozny_identity_provider.azure_identity_provider,
+  ]
+  realm_name                    = "localtest"
+  alias                         = "azure-ad"  
+  name                          = "Azure Role Map"
+  identity_provider_mapper      = "oidc-role-idp-mapper"
+  config {
+        sync_mode   = "FORCE"
+		    claim       = "roles"
+		    claim_value = "Test.Role"
+		    role        = "FirstRole"
+  }
+}
