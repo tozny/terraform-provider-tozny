@@ -13,6 +13,7 @@ func resourceIdentityProvider() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceIdentityProviderCreate,
 		ReadContext:   resourceIdentityProviderRead,
+		UpdateContext: resourceIdentityProviderUpdate,
 		DeleteContext: resourceIdentityProviderDelete,
 		Schema: map[string]*schema.Schema{
 			"client_credentials_filepath": {
@@ -36,26 +37,22 @@ func resourceIdentityProvider() *schema.Resource {
 				Description: "The name of the realm to associate the provider with.",
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
 			},
 			"display_name": {
 				Description: "User defined name for the provider.",
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
 			},
 			"alias": {
 				Description: "User defined unique ID for the provider.",
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
 			},
 			"enabled": {
 				Description: "Whether the provider is enabled for syncing identities. Defaults to `true`.",
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     true,
-				ForceNew:    true,
 			},
 			"config": {
 				Description: "Settings for the identity provider.",
@@ -68,38 +65,32 @@ func resourceIdentityProvider() *schema.Resource {
 							Description: "Auth URL from azure.",
 							Type:        schema.TypeString,
 							Required:    true,
-							ForceNew:    true,
 						},
 						"token_url": {
 							Description: "Token URL from azure.",
 							Type:        schema.TypeString,
 							Required:    true,
-							ForceNew:    true,
 						},
 						"client_id": {
 							Description: "Client ID from azure.",
 							Type:        schema.TypeString,
 							Required:    true,
-							ForceNew:    true,
 						},
 						"client_secret": {
 							Description: "Client Secret from azure.",
 							Type:        schema.TypeString,
 							Required:    true,
-							ForceNew:    true,
 						},
 						"client_auth_method": {
 							Description: "Client Auth method to send token from TozID.",
 							Type:        schema.TypeString,
 							Default:     "client_secret_post",
 							Optional:    true,
-							ForceNew:    true,
 						},
 						"default_scope": {
 							Description: "Default scope.",
 							Type:        schema.TypeString,
 							Required:    true,
-							ForceNew:    true,
 						},
 					},
 				},
@@ -157,6 +148,39 @@ func resourceIdentityProviderRead(ctx context.Context, d *schema.ResourceData, m
 	return diags
 }
 
+func resourceIdentityProviderUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+	var err error
+	toznySDK, err := MakeToznySDK(d, m)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	realmName := d.Get("realm_name").(string)
+	alias := d.Get("alias").(string)
+	config := d.Get("config").([]interface{})[0].(map[string]interface{})
+	providerConfig := map[string]interface{}{
+		"authorizationUrl": config["authorization_url"].(string),
+		"tokenUrl":         config["token_url"].(string),
+		"clientAuthMethod": config["client_auth_method"].(string),
+		"clientId":         config["client_id"].(string),
+		"clientSecret":     config["client_secret"].(string),
+		"defaultScope":     config["default_scope"].(string),
+	}
+	createIdpRequest := identityClient.CreateIdentityProviderRequest{
+		ProviderId:  "oidc",
+		Alias:       d.Get("alias").(string),
+		Config:      providerConfig,
+		DisplayName: d.Get("display_name").(string),
+		Enabled:     true,
+	}
+	err = toznySDK.UpdateIdentityProvider(ctx, realmName, alias, createIdpRequest)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.SetId(createIdpRequest.Alias)
+	return diags
+}
+
 func resourceIdentityProviderDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	var diags diag.Diagnostics
@@ -170,5 +194,6 @@ func resourceIdentityProviderDelete(ctx context.Context, d *schema.ResourceData,
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	d.SetId("")
 	return diags
 }

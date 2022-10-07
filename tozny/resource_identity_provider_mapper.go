@@ -106,7 +106,7 @@ func resourceIdentityProviderMapperCreate(ctx context.Context, d *schema.Resourc
 	alias := d.Get("alias").(string)
 	config := d.Get("config").([]interface{})[0].(map[string]interface{})
 	providerMapperConfig := map[string]interface{}{
-		"sync_mode":   config["sync_mode"].(string),
+		"syncMode":    config["sync_mode"].(string),
 		"claim":       config["claim"].(string),
 		"claim.value": config["claim_value"].(string),
 		"role":        config["role"].(string),
@@ -121,22 +121,23 @@ func resourceIdentityProviderMapperCreate(ctx context.Context, d *schema.Resourc
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	d.SetId(alias)
 	return diags
 }
 
 func resourceIdentityProviderMapperRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
-	// toznySDK, err := MakeToznySDK(d, m)
-	// if err != nil {
-	// 	return diag.FromErr(err)
-	// }
-	// realmName := d.Get("realm_name").(string)
-	// alias := d.Get("alias").(string)
-	// idpRepresentation, err := toznySDK.GetIdentityProvider(ctx, realmName, alias)
-	// if err != nil {
-	// 	return diag.FromErr(err)
-	// }
-	// d.Set("alias", idpRepresentation.Alias)
+	toznySDK, err := MakeToznySDK(d, m)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	realmName := d.Get("realm_name").(string)
+	alias := d.Get("alias").(string)
+	idpRepresentation, err := toznySDK.GetIdentityProvider(ctx, realmName, alias)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.Set("alias", idpRepresentation.Alias)
 	return diags
 }
 

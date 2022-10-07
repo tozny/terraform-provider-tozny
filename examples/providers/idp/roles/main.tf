@@ -21,15 +21,15 @@ provider "tozny" {
 }
 
 # A resource for mapping roles
-resource "tozny_idp_mapper" "idp_role_mapper" {
+resource "tozny_identity_provider_mapper" "idp_role_mapper" {
   realm_name                    = "localtest"
-  alias                         = "oidc-test"  
+  alias                         = "azure-ad"  
   name                          = "Azure Role Map"
   identity_provider_mapper      = "oidc-role-idp-mapper"
   config {
-        sync_mode   = "INHERIT"
-		claim       = 
-		claim.value = 
-		role        = 
+        sync_mode   = "FORCE"
+		    claim       = "roles"
+		    claim_value = "Test.Role"
+		    role        = "FirstRole"
   }
 }
