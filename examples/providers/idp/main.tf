@@ -62,8 +62,8 @@ resource "tozny_identity_provider" "okta_identity_provider" {
     authorization_url       = "https://dev-49909711.okta.com/oauth2/default/v1/authorize"
     token_url               = "https://dev-49909711.okta.com/oauth2/default/v1/token"
     client_auth_method      = "client_secret_post"
-    client_id               = "0oa66z9mi3F5akVdh5d7"
-    client_secret           = "NnSR7HrXL2TQx5r3pwmiBBZ6qr6nwL5lMUmt8iIJ"
+    client_id               = "randomclientid"
+    client_secret           = "randomclientsecret"
     default_scope           = "email profile openid"
   }
 }

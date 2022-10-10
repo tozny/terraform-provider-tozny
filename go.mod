@@ -9,4 +9,4 @@ require (
 	github.com/tozny/e3db-go/v2 v2.6.0
 )
 
-replace github.com/tozny/e3db-clients-go => /Volumes/Wizard/Projects/Tozny/Repos/e3db-clients-go
+// replace github.com/tozny/e3db-clients-go => /Volumes/Wizard/Projects/Tozny/Repos/e3db-clients-go
