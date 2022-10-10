@@ -47,6 +47,7 @@ func resourceIdentityProvider() *schema.Resource {
 				Description: "User defined unique ID for the provider.",
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 			},
 			"enabled": {
 				Description: "Whether the provider is enabled for syncing identities. Defaults to `true`.",

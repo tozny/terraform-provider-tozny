@@ -32,6 +32,12 @@ func resourceIdentityProviderMapper() *schema.Resource {
 				Sensitive:     true,
 				ConflictsWith: []string{"client_credentials_filepath"},
 			},
+			"mapper_id": {
+				Description: "The id of the provider mapper.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+			},
 			"realm_name": {
 				Description: "The name of the realm to associate the provider with.",
 				Type:        schema.TypeString,
@@ -117,11 +123,12 @@ func resourceIdentityProviderMapperCreate(ctx context.Context, d *schema.Resourc
 		IdentityProviderAlias:  alias,
 		IdentityProviderMapper: d.Get("identity_provider_mapper").(string),
 	}
-	err = toznySDK.CreateIdentityProviderMapper(ctx, realmName, alias, createIdpMapperRequest)
+	response, err := toznySDK.CreateIdentityProviderMapper(ctx, realmName, alias, createIdpMapperRequest)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.SetId(alias)
+	d.Set("mapper_id", response.Id)
+	d.SetId(response.Id)
 	return diags
 }
 
@@ -133,26 +140,28 @@ func resourceIdentityProviderMapperRead(ctx context.Context, d *schema.ResourceD
 	}
 	realmName := d.Get("realm_name").(string)
 	alias := d.Get("alias").(string)
-	idpRepresentation, err := toznySDK.GetIdentityProvider(ctx, realmName, alias)
+	mapperId := d.Get("mapper_id").(string)
+	_, err = toznySDK.GetIdentityProviderMapper(ctx, realmName, alias, mapperId)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.Set("alias", idpRepresentation.Alias)
+
 	return diags
 }
 
 func resourceIdentityProviderMapperDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	var diags diag.Diagnostics
-	// toznySDK, err := MakeToznySDK(d, m)
-	// if err != nil {
-	// 	return diag.FromErr(err)
-	// }
-	// realmName := d.Get("realm_name").(string)
-	// alias := d.Get("alias").(string)
-	// err = toznySDK.DeleteIdentityProvider(ctx, realmName, alias)
-	// if err != nil {
-	// 	return diag.FromErr(err)
-	// }
+	toznySDK, err := MakeToznySDK(d, m)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	realmName := d.Get("realm_name").(string)
+	alias := d.Get("alias").(string)
+	mapperId := d.Get("mapper_id").(string)
+	err = toznySDK.DeleteIdentityProviderMapper(ctx, realmName, alias, mapperId)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	return diags
 }

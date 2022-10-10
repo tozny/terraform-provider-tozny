@@ -25,7 +25,7 @@ provider "tozny" {
 resource "tozny_identity_provider" "azure_identity_provider" {
   realm_name                = "localtest"
   display_name              = "Azure AD"
-  alias                     = "azure-ad"
+  alias                     = "azure-ad-1"
   enabled                   = true
   config {
     authorization_url       = "https://test-eidp.com/auth"
@@ -42,7 +42,7 @@ resource "tozny_identity_provider_mapper" "idp_role_mapper" {
     tozny_identity_provider.azure_identity_provider,
   ]
   realm_name                    = "localtest"
-  alias                         = "azure-ad"  
+  alias                         = "azure-ad-1"  
   name                          = "Azure Role Map"
   identity_provider_mapper      = "oidc-role-idp-mapper"
   config {
@@ -50,5 +50,20 @@ resource "tozny_identity_provider_mapper" "idp_role_mapper" {
 		    claim       = "roles"
 		    claim_value = "Test.Role"
 		    role        = "FirstRole"
+  }
+}
+
+resource "tozny_identity_provider" "okta_identity_provider" {
+  realm_name                = "localtest"
+  display_name              = "Okta"
+  alias                     = "okta"
+  enabled                   = true
+  config {
+    authorization_url       = "https://dev-49909711.okta.com/oauth2/default/v1/authorize"
+    token_url               = "https://dev-49909711.okta.com/oauth2/default/v1/token"
+    client_auth_method      = "client_secret_post"
+    client_id               = "0oa66z9mi3F5akVdh5d7"
+    client_secret           = "NnSR7HrXL2TQx5r3pwmiBBZ6qr6nwL5lMUmt8iIJ"
+    default_scope           = "email profile openid"
   }
 }
