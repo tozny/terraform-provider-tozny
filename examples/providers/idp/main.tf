@@ -20,8 +20,7 @@ provider "tozny" {
   account_password = "Test@12345"
 }
 
-# A resource for provisioning the use of an external identity server
-# for federating identities for a realm
+# A resource for provisioning the use of an external identity provider
 resource "tozny_identity_provider" "azure_identity_provider" {
   realm_name                = "localtest"
   display_name              = "Azure AD"
