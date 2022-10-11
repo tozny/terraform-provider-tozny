@@ -35,8 +35,7 @@ func resourceIdentityProviderMapper() *schema.Resource {
 			"mapper_id": {
 				Description: "The id of the provider mapper.",
 				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
+				Computed:    true,
 			},
 			"realm_name": {
 				Description: "The name of the realm to associate the provider with.",
