@@ -8,7 +8,7 @@ terraform {
       # for Tozny registry.terraform.io/tozny
       source = "tozny/tozny"
       # Pin Tozny provider version
-      version = ">=0.23.0"
+      version = ">=0.24.0"
     }
   }
 }
@@ -22,14 +22,14 @@ provider "tozny" {
 
 # A resource for mapping roles
 resource "tozny_identity_provider_mapper" "idp_role_mapper" {
-  realm_name                    = "localtest"
-  alias                         = "azure-ad"  
-  name                          = "Azure Role Map"
-  identity_provider_mapper      = "oidc-role-idp-mapper"
+  realm_name               = "localtest"
+  alias                    = "azure-ad"
+  name                     = "Azure Role Map"
+  identity_provider_mapper = "oidc-role-idp-mapper"
   config {
-        sync_mode   = "FORCE"
-		    claim       = "roles"
-		    claim_value = "Test.Role"
-		    role        = "FirstRole"
+    sync_mode   = "FORCE"
+    claim       = "roles"
+    claim_value = "Test.Role"
+    role        = "FirstRole"
   }
 }

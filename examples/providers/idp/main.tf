@@ -8,7 +8,7 @@ terraform {
       # for Tozny registry.terraform.io/tozny
       source = "tozny/tozny"
       # Pin Tozny provider version
-      version = ">=0.23.0"
+      version = ">=0.24.0"
     }
   }
 }
@@ -22,17 +22,17 @@ provider "tozny" {
 
 # A resource for provisioning the use of an external identity provider
 resource "tozny_identity_provider" "azure_identity_provider" {
-  realm_name                = "localtest"
-  display_name              = "Azure AD"
-  alias                     = "azure-ad-1"
-  enabled                   = true
+  realm_name   = "localtest"
+  display_name = "Azure AD"
+  alias        = "azure-ad-1"
+  enabled      = true
   config {
-    authorization_url       = "https://test-eidp.com/auth"
-    token_url               = "https://test-eidp.com/token"
-    client_auth_method      = "client_secret_post"
-    client_id               = "sdsdscscscdvdfdfdfdf"
-    client_secret           = "asdasdsaxcdscdcddvdvfv"
-    default_scope           = "email profile openid"
+    authorization_url  = "https://test-eidp.com/auth"
+    token_url          = "https://test-eidp.com/token"
+    client_auth_method = "client_secret_post"
+    client_id          = "sdsdscscscdvdfdfdfdf"
+    client_secret      = "asdasdsaxcdscdcddvdvfv"
+    default_scope      = "email profile openid"
   }
 }
 
@@ -40,29 +40,29 @@ resource "tozny_identity_provider_mapper" "idp_role_mapper" {
   depends_on = [
     tozny_identity_provider.azure_identity_provider,
   ]
-  realm_name                    = "localtest"
-  alias                         = "azure-ad-1"  
-  name                          = "Azure Role Map"
-  identity_provider_mapper      = "oidc-role-idp-mapper"
+  realm_name               = "localtest"
+  alias                    = "azure-ad-1"
+  name                     = "Azure Role Map"
+  identity_provider_mapper = "oidc-role-idp-mapper"
   config {
-        sync_mode   = "FORCE"
-		    claim       = "roles"
-		    claim_value = "Test.Role"
-		    role        = "FirstRole"
+    sync_mode   = "FORCE"
+    claim       = "roles"
+    claim_value = "Test.Role"
+    role        = "FirstRole"
   }
 }
 
 resource "tozny_identity_provider" "okta_identity_provider" {
-  realm_name                = "localtest"
-  display_name              = "Okta"
-  alias                     = "okta"
-  enabled                   = true
+  realm_name   = "localtest"
+  display_name = "Okta"
+  alias        = "okta"
+  enabled      = true
   config {
-    authorization_url       = "https://dev-49909711.okta.com/oauth2/default/v1/authorize"
-    token_url               = "https://dev-49909711.okta.com/oauth2/default/v1/token"
-    client_auth_method      = "client_secret_post"
-    client_id               = "randomclientid"
-    client_secret           = "randomclientsecret"
-    default_scope           = "email profile openid"
+    authorization_url  = "https://dev-49909711.okta.com/oauth2/default/v1/authorize"
+    token_url          = "https://dev-49909711.okta.com/oauth2/default/v1/token"
+    client_auth_method = "client_secret_post"
+    client_id          = "randomclientid"
+    client_secret      = "randomclientsecret"
+    default_scope      = "email profile openid"
   }
 }
