@@ -8,7 +8,7 @@ terraform {
       # for Tozny registry.terraform.io/tozny
       source = "tozny/tozny"
       # Pin Tozny provider version
-      version = ">=0.24.0"
+      version = ">=0.25.0"
     }
   }
 }
@@ -63,6 +63,7 @@ resource "tozny_realm" "my_organizations_realm" {
   default_registration_token  = tozny_client_registration_token.realm_registration_token.token
   mpc_enabled                 = true
   tozid_federation_enabled    = true
+  secrets_enabled             = true
   forgot_password_custom_link = "http://the_link"
   forgot_password_custom_text = "Offline reset text"
 }

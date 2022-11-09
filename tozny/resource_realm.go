@@ -109,6 +109,12 @@ func resourceRealm() *schema.Resource {
 				Optional:    true,
 				Default:     false,
 			},
+			"secrets_enabled": {
+				Description: "Flag to enable TozSecrets for the Realm.",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+			},
 			"tozid_federation_enabled": {
 				Description: "Flag to enable TozID Federation for the Realm.",
 				Type:        schema.TypeBool,
@@ -151,10 +157,12 @@ func resourceRealmCreate(ctx context.Context, d *schema.ResourceData, m interfac
 
 	mpcEnabled := d.Get("mpc_enabled").(bool)
 	tozidFederation := d.Get("tozid_federation_enabled").(bool)
+	secretsEnabled := d.Get("secrets_enabled").(bool)
 
 	settingsUpdateRequest := identityClient.RealmSettingsUpdateRequest{
 		MPCEnabled:             &mpcEnabled,
 		TozIDFederationEnabled: &tozidFederation,
+		SecretsEnabled:         &secretsEnabled,
 	}
 	customForgetPasswordLink, exists := d.GetOk("forgot_password_custom_link")
 
@@ -185,8 +193,18 @@ func resourceRealmCreate(ctx context.Context, d *schema.ResourceData, m interfac
 		},
 	})
 	d.Set("mpc_enabled", d.Get("mpc_enabled"))
+	d.Set("secrets_enabled", d.Get("secrets_enabled"))
 	d.Set("tozid_federation_enabled", d.Get("tozid_federation_enabled"))
 
+	if exists {
+		customForgetPasswordLinkStr := customForgetPasswordLink.(string)
+		d.Set("forgot_password_custom_link", customForgetPasswordLinkStr)
+	}
+
+	if textExists {
+		customForgetPasswordTextStr := customForgetPasswordText.(string)
+		d.Set("forgot_password_custom_text", customForgetPasswordTextStr)
+	}
 	// Associate created Realm with Terraform state and signal success
 	d.SetId(fmt.Sprintf("%d", realm.ID))
 
@@ -227,6 +245,14 @@ func resourceRealmRead(ctx context.Context, d *schema.ResourceData, m interface{
 	})
 	d.Set("mpc_enabled", privateRealmInfo.MPCEnabled)
 	d.Set("tozid_federation_enabled", privateRealmInfo.TozIDFederationEnabled)
+	d.Set("secrets_enabled", privateRealmInfo.SecretsEnabled)
+
+	realmInfo, err := toznySDK.RealmInfo(ctx, d.Get("realm_name").(string))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.Set("forgot_password_custom_text", realmInfo.ForgotPasswordCustomText)
+	d.Set("forgot_password_custom_link", realmInfo.ForgotPasswordCustomLink)
 
 	return diags
 }
@@ -259,14 +285,15 @@ func resourceRealmUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 		return diag.FromErr(err)
 	}
 
-	if d.HasChanges("mpc_enabled", "tozid_federation_enabled", "forgot_password_custom_link", "forgot_password_custom_text") {
+	if d.HasChanges("mpc_enabled", "secrets_enabled", "tozid_federation_enabled", "forgot_password_custom_link", "forgot_password_custom_text") {
 
 		federation_setting := d.Get("tozid_federation_enabled").(bool)
 		mpc_setting := d.Get("mpc_enabled").(bool)
-
+		secretsEnabled := d.Get("secrets_enabled").(bool)
 		settingsUpdateRequest := identityClient.RealmSettingsUpdateRequest{
 			MPCEnabled:             &mpc_setting,
 			TozIDFederationEnabled: &federation_setting,
+			SecretsEnabled:         &secretsEnabled,
 		}
 		// Check if Forgot Password Link exists
 		customForgetPasswordLink := d.Get("forgot_password_custom_link")
@@ -283,6 +310,7 @@ func resourceRealmUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 			return diag.FromErr(err)
 		}
 		d.Set("mpc_enabled", d.Get("mpc_enabled"))
+		d.Set("secrets_enabled", d.Get("secrets_enabled"))
 		d.Set("tozid_federation_enabled", d.Get("tozid_federation_enabled"))
 		d.Set("forgot_password_custom_text", d.Get("forgot_password_custom_text"))
 		d.Set("forgot_password_custom_link", d.Get("forgot_password_custom_link"))
