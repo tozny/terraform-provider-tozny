@@ -110,6 +110,7 @@ resource "tozny_realm_broker_delegation" "allow_tozny_hosted_brokering_policy" {
 - `sovereign` - (Computed) The admin identity for a realm.
 - `default_registration_token` - (Optional) The default registration token to use for registering new Identities with this Realm.
 - `mpc_enabled` - (Optional) Flag for enabling MPC for the Realm. Defaults to false.
+- `secrets_enabled` - (Optional) Flag for enabling TozSecrets for the Realm. Defaults to false.
 - `tozid_federation_enabled` - (Optional) Flag for enabling TozID Federated Realm. Defaults to False.
 - `forgot_password_custom_text`- (Optional) If set, this text will appear when an Identity presses "Forgot Password". It is meant for offline password changes.
 - `forgot_password_custom_link`- (Optional) If set, there are two results. If the link begins with "http" it will be an absolute path, if not it will be appended to the host

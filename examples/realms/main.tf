@@ -63,6 +63,7 @@ resource "tozny_realm" "my_organizations_realm" {
   default_registration_token  = tozny_client_registration_token.realm_registration_token.token
   mpc_enabled                 = true
   tozid_federation_enabled    = true
+  secrets_enabled             = true
   forgot_password_custom_link = "http://the_link"
   forgot_password_custom_text = "Offline reset text"
 }
