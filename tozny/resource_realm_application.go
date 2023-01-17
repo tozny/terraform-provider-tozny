@@ -15,6 +15,7 @@ func resourceRealmApplication() *schema.Resource {
 		CreateContext: resourceRealmApplicationCreate,
 		ReadContext:   resourceRealmApplicationRead,
 		DeleteContext: resourceRealmApplicationDelete,
+		UpdateContext: resourceRealmApplicationUpdate,
 		Schema: map[string]*schema.Schema{
 			"client_credentials_filepath": {
 				Description:   "The filepath to Tozny client credentials for the provider to use when provisioning this application.",
@@ -74,7 +75,6 @@ func resourceRealmApplication() *schema.Resource {
 				Description:   "Settings for an OIDC protocol based application.",
 				Type:          schema.TypeList,
 				Optional:      true,
-				ForceNew:      true,
 				ConflictsWith: []string{"saml_settings"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -85,47 +85,40 @@ func resourceRealmApplication() *schema.Resource {
 								Type: schema.TypeString,
 							},
 							Optional: true,
-							ForceNew: true,
 						},
 						"access_type": {
 							Description: "The OIDC access type.",
 							Type:        schema.TypeString,
 							Optional:    true,
-							ForceNew:    true,
 							Default:     "confidential",
 						},
 						"root_url": {
 							Description: "The URL to append to any relative URLs.",
 							Type:        schema.TypeString,
 							Optional:    true,
-							ForceNew:    true,
 						},
 						"standard_flow_enabled": {
 							Description: "Whether the OIDC standard flow is enabled",
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Default:     true,
-							ForceNew:    true,
 						},
 						"implicit_flow_enabled": {
 							Description: "Whether the OIDC implicit flow is enabled",
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Default:     false,
-							ForceNew:    true,
 						},
 						"direct_access_grants_enabled": {
 							Description: "Whether for OIDC flows direct access grants are enabled.",
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Default:     false,
-							ForceNew:    true,
 						},
 						"base_url": {
 							Description: "The OIDC base URL.",
 							Type:        schema.TypeString,
 							Optional:    true,
-							ForceNew:    true,
 						},
 					},
 				},
@@ -134,7 +127,6 @@ func resourceRealmApplication() *schema.Resource {
 				Description:   "Settings for a SAML protocol based application.",
 				Type:          schema.TypeList,
 				Optional:      true,
-				ForceNew:      true,
 				ConflictsWith: []string{"oidc_settings"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -145,73 +137,61 @@ func resourceRealmApplication() *schema.Resource {
 								Type: schema.TypeString,
 							},
 							Optional: true,
-							ForceNew: true,
 						},
 						"default_endpoint": {
 							Description: "URL used for every binding to both the SP's Assertion Consumer and Single Logout Services. This can be individually overridden for each binding and service.",
 							Type:        schema.TypeString,
 							Optional:    true,
-							ForceNew:    true,
 						},
 						"include_authn_statement": {
 							Description: "Whether to include the Authn statement.",
 							Type:        schema.TypeBool,
 							Optional:    true,
-							ForceNew:    true,
 						},
 						"include_one_time_use_condition": {
 							Description: "Whether to include the one time use condition.",
 							Type:        schema.TypeBool,
 							Optional:    true,
-							ForceNew:    true,
 						},
 						"sign_documents": {
 							Description: "Whether to sign documents.",
 							Type:        schema.TypeBool,
 							Optional:    true,
-							ForceNew:    true,
 						},
 						"sign_assertions": {
 							Description: "Whether to sign assertions.",
 							Type:        schema.TypeBool,
 							Optional:    true,
-							ForceNew:    true,
 						},
 						"client_signature_required": {
 							Description: "Whether client signature is required.",
 							Type:        schema.TypeBool,
 							Optional:    true,
-							ForceNew:    true,
 						},
 						"force_post_binding": {
 							Description: "Whether to force POST binding.",
 							Type:        schema.TypeBool,
 							Optional:    true,
-							ForceNew:    true,
 						},
 						"force_name_id_format": {
 							Description: "Whether to force name ID format.",
 							Type:        schema.TypeBool,
 							Optional:    true,
-							ForceNew:    true,
 						},
 						"name_id_format": {
 							Description: "The name ID format",
 							Type:        schema.TypeString,
 							Optional:    true,
-							ForceNew:    true,
 						},
 						"idp_initiated_sso_url_name": {
 							Description: "The IDP initiated SSO URL name.",
 							Type:        schema.TypeString,
 							Optional:    true,
-							ForceNew:    true,
 						},
 						"assertion_consumer_service_post_binding_url": {
 							Description: "The assertion consumer service post bind URL.",
 							Type:        schema.TypeString,
 							Optional:    true,
-							ForceNew:    true,
 						},
 					},
 				},
@@ -296,6 +276,69 @@ func resourceRealmApplicationCreate(ctx context.Context, d *schema.ResourceData,
 
 	d.Set("application_id", applicationID)
 
+	// Associate created realm application  with Terraform state and signal success
+	d.SetId(applicationID)
+
+	return diags
+}
+func resourceRealmApplicationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	toznySDK, err := MakeToznySDK(d, m)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	updateApplicationSetting := identityClient.UpdateRealmApplicationRequest{
+		RealmName: d.Get("realm_name").(string),
+		ApplicationSettings: identityClient.UpdateApplicationSettings{
+			ApplicationID: d.Get("application_id").(string),
+			Protocol:      strings.ToLower(d.Get("protocol").(string)),
+		},
+	}
+	maybeTerraformOIDCSettings := d.Get("oidc_settings").([]interface{})
+
+	if len(maybeTerraformOIDCSettings) > 0 {
+		terraformOIDCSettings := maybeTerraformOIDCSettings[0].(map[string]interface{})
+
+		updateApplicationSetting.ApplicationSettings.OIDCSettings = identityClient.ApplicationOIDCSettings{
+			RootURL:                   terraformOIDCSettings["root_url"].(string),
+			StandardFlowEnabled:       terraformOIDCSettings["standard_flow_enabled"].(bool),
+			ImplicitFlowEnabled:       terraformOIDCSettings["implicit_flow_enabled"].(bool),
+			DirectAccessGrantsEnabled: terraformOIDCSettings["direct_access_grants_enabled"].(bool),
+			BaseURL:                   terraformOIDCSettings["base_url"].(string),
+			AccessType:                terraformOIDCSettings["access_type"].(string),
+		}
+	}
+
+	maybeTerraformSAMLSettings := d.Get("saml_settings").([]interface{})
+
+	if len(maybeTerraformSAMLSettings) > 0 {
+		terraformSAMLSettings := maybeTerraformSAMLSettings[0].(map[string]interface{})
+
+		updateApplicationSetting.ApplicationSettings.SAMLSettings = identityClient.ApplicationSAMLSettings{
+			DefaultEndpoint:                        terraformSAMLSettings["default_endpoint"].(string),
+			IncludeAuthnStatement:                  terraformSAMLSettings["include_authn_statement"].(bool),
+			IncludeOneTimeUseCondition:             terraformSAMLSettings["include_one_time_use_condition"].(bool),
+			SignDocuments:                          terraformSAMLSettings["sign_documents"].(bool),
+			SignAssertions:                         terraformSAMLSettings["sign_assertions"].(bool),
+			ClientSignatureRequired:                terraformSAMLSettings["client_signature_required"].(bool),
+			ForcePostBinding:                       terraformSAMLSettings["force_post_binding"].(bool),
+			ForceNameIDFormat:                      terraformSAMLSettings["force_name_id_format"].(bool),
+			NameIDFormat:                           terraformSAMLSettings["name_id_format"].(string),
+			IDPInitiatedSSOURLName:                 terraformSAMLSettings["idp_initiated_sso_url_name"].(string),
+			AssertionConsumerServicePOSTBindingURL: terraformSAMLSettings["assertion_consumer_service_post_binding_url"].(string),
+		}
+	}
+
+	application, err := toznySDK.UpdateRealmApplication(ctx, updateApplicationSetting)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	applicationID := application.ID
+	d.Set("application_id", applicationID)
 	// Associate created realm application  with Terraform state and signal success
 	d.SetId(applicationID)
 
