@@ -27,6 +27,10 @@ install-mac: build
 	mkdir -p ~/Library/Application\ Support/io.terraform/plugins/registry.terraform.io/tozny/tozny/${VERSION}/darwin_amd64/
 	mv ${BINARY} ~/Library/Application\ Support/io.terraform/plugins/registry.terraform.io/tozny/tozny/${VERSION}/darwin_amd64/${BINARY}_v${VERSION}
 
+install-mac-arm: build
+	mkdir -p ~/Library/Application\ Support/io.terraform/plugins/registry.terraform.io/tozny/tozny/${VERSION}/darwin_arm64/
+	mv ${BINARY} ~/Library/Application\ Support/io.terraform/plugins/registry.terraform.io/tozny/tozny/${VERSION}/darwin_arm64/${BINARY}_v${VERSION}
+
 clean-mac:
 	rm -rf ~/Library/Application\ Support/io.terraform/plugins/registry.terraform.io/tozny/tozny/ || true
 

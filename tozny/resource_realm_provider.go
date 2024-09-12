@@ -97,6 +97,12 @@ func resourceRealmProvider() *schema.Resource {
 							Required:    true,
 							ForceNew:    true,
 						},
+						"edit_mode": {
+							Description: "READ_ONLY is a read-only LDAP store. WRITABLE means data will be synced back to LDAP on demand. UNSYNCED means user data will be imported, but not synced back to LDAP.",
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+						},
 						"rdn_attribute": {
 							Description: "Name of LDAP attribute, which is used as RDN (top attribute) of typical user DN. Usually it's the same as Username LDAP attribute, however it's not required. For example for Active directory it's common to use 'cn' as RDN attribute when username attribute might be 'sAMAccountName'.",
 							Type:        schema.TypeString,
@@ -217,6 +223,7 @@ func resourceRealmProviderCreate(ctx context.Context, d *schema.ResourceData, m 
 			ConnectionSettings: identityClient.ProviderConnectionSettings{
 				Type:                  terraformConnectionSettings["type"].(string),
 				IdentityNameAttribute: terraformConnectionSettings["identity_name_attribute"].(string),
+				EditMode:              terraformConnectionSettings["edit_mode"].(string),
 				RDNAttribute:          terraformConnectionSettings["rdn_attribute"].(string),
 				UUIDAttribute:         terraformConnectionSettings["uuid_attribute"].(string),
 				IdentityObjectClasses: fetchIdentityObjectClasses(d),
@@ -307,6 +314,7 @@ func resourceRealmProviderRead(ctx context.Context, d *schema.ResourceData, m in
 		map[string]interface{}{
 			"type":                    provider.ConnectionSettings.Type,
 			"identity_name_attribute": provider.ConnectionSettings.IdentityNameAttribute,
+			"edit_mode":               provider.ConnectionSettings.EditMode,
 			"rdn_attribute":           provider.ConnectionSettings.RDNAttribute,
 			"uuid_attribute":          provider.ConnectionSettings.UUIDAttribute,
 			"identity_object_classes": configuredIdentityObjectClasses,
