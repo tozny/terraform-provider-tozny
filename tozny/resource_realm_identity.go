@@ -76,13 +76,13 @@ func resourceRealmIdentity() *schema.Resource {
 			"first_name": {
 				Description: "The first name associated with this identity",
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				ForceNew:    true,
 			},
 			"last_name": {
 				Description: "The last name associated with this identity",
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				ForceNew:    true,
 			},
 			"recovery_email_ttl": {
@@ -111,6 +111,8 @@ func resourceRealmIdentityCreate(ctx context.Context, d *schema.ResourceData, m 
 	password := d.Get("password").(string)
 	brokerTargetURL := d.Get("broker_target_url").(string)
 	emailExpiryMinutes := d.Get("recovery_email_ttl").(int)
+	firstName := d.Get("first_name").(string)
+	lastName := d.Get("last_name").(string)
 	realm := e3db.Realm{
 		Name:               realmName,
 		App:                e3db.AccountApplicationName,
@@ -119,7 +121,7 @@ func resourceRealmIdentityCreate(ctx context.Context, d *schema.ResourceData, m 
 		EmailExpiryMinutes: emailExpiryMinutes,
 	}
 
-	identity, err := realm.Register(username, password, registrationToken, email, "", "")
+	identity, err := realm.Register(username, password, registrationToken, email, firstName, lastName)
 	if err != nil {
 		return diag.FromErr(err)
 	}
