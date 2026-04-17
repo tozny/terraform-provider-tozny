@@ -149,6 +149,13 @@ func resourceAccount() *schema.Resource {
 				ForceNew:      true,
 				ConflictsWith: []string{"account", "profile"},
 			},
+			"use_if_exists": {
+				Description: "If true, when account creation fails with a conflict (409), attempt to login with the provider credentials and use the existing account instead of failing.",
+				Type:        schema.TypeBool,
+				Default:     false,
+				Optional:    true,
+				ForceNew:    true,
+			},
 			"account_credentials_filepath": {
 				Description: "The filepath where account credentials will be loaded from.",
 				Type:        schema.TypeString,
@@ -287,28 +294,29 @@ func resourceAccount() *schema.Resource {
 }
 
 /*
-  resourceAccountCreate creates an account based off (file driven or Terraform
-  schema derived) + provider configuration using the following algorithm
-   if auto-generate
-     if account credentials file
-       error - conflict
-     else
-       if no username on provider
-         error - missing data
-       if no password on provider
-         auto-generate password
-       use username & password to derive account credentials
-       create account
-       save client & account config to file
-   else if NOT auto generate
-    if account credentials file
-      load credentials
-      create account
-      save client config to file
-    else
-      parse config from Terraform
-      create account
-      save client config to file
+resourceAccountCreate creates an account based off (file driven or Terraform
+schema derived) + provider configuration using the following algorithm
+
+	if auto-generate
+	  if account credentials file
+	    error - conflict
+	  else
+	    if no username on provider
+	      error - missing data
+	    if no password on provider
+	      auto-generate password
+	    use username & password to derive account credentials
+	    create account
+	    save client & account config to file
+	else if NOT auto generate
+	 if account credentials file
+	   load credentials
+	   create account
+	   save client config to file
+	 else
+	   parse config from Terraform
+	   create account
+	   save client config to file
 */
 func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
@@ -318,6 +326,7 @@ func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interf
 	var createAccountParams accountClient.CreateAccountRequest
 
 	autoGenerateKey := "autogenerate_account_credentials"
+	useIfExists := d.Get("use_if_exists").(bool)
 
 	persistKey := "persist_credentials_to"
 	persistTo := d.Get(persistKey).(string)
@@ -360,27 +369,50 @@ func resourceAccountCreate(ctx context.Context, d *schema.ResourceData, m interf
 		createdAccount, err := toznySDK.Register(ctx, accountUsername, accountUsername, accountPassword, apiEndpoint)
 
 		if err != nil {
-			return diag.FromErr(err)
+			if useIfExists && strings.Contains(err.Error(), "409") {
+				loggedInAccount, loginErr := toznySDK.Login(ctx, accountUsername, accountPassword, "password", apiEndpoint)
+				if loginErr != nil {
+					return diag.Errorf("account already exists (409) and login failed: %v", loginErr)
+				}
+				accountID = loggedInAccount.AccountID
+				sdkV3Config = e3db.ToznySDKJSONConfig{
+					ConfigFile: e3db.ConfigFile{
+						Version:     loggedInAccount.Config.Version,
+						APIBaseURL:  loggedInAccount.Config.APIURL,
+						APIKeyID:    loggedInAccount.Config.APIKeyID,
+						APISecret:   loggedInAccount.Config.APISecret,
+						ClientID:    loggedInAccount.Config.ClientID,
+						ClientEmail: loggedInAccount.Config.ClientEmail,
+						PublicKey:   loggedInAccount.Config.PublicKey,
+						PrivateKey:  loggedInAccount.Config.PrivateKey,
+					},
+					AccountPassword:   accountPassword,
+					AccountUsername:   strings.ToLower(accountUsername),
+					PublicSigningKey:  loggedInAccount.Config.PublicSigningKey,
+					PrivateSigningKey: loggedInAccount.Config.PrivateSigningKey,
+				}
+			} else {
+				return diag.FromErr(err)
+			}
+		} else {
+			sdkV3Config = e3db.ToznySDKJSONConfig{
+				ConfigFile: e3db.ConfigFile{
+					Version:     createdAccount.Account.Config.Version,
+					APIBaseURL:  createdAccount.Account.Config.APIURL,
+					APIKeyID:    createdAccount.Account.Config.APIKeyID,
+					APISecret:   createdAccount.Account.Config.APISecret,
+					ClientID:    createdAccount.Account.Config.ClientID,
+					ClientEmail: createdAccount.Account.Config.ClientEmail,
+					PublicKey:   createdAccount.Account.Config.PublicKey,
+					PrivateKey:  createdAccount.Account.Config.PrivateKey,
+				},
+				AccountPassword:   accountPassword,
+				AccountUsername:   strings.ToLower(accountUsername),
+				PublicSigningKey:  createdAccount.Account.Config.PublicSigningKey,
+				PrivateSigningKey: createdAccount.Account.Config.PrivateSigningKey,
+			}
+			accountID = createdAccount.Account.AccountID
 		}
-
-		sdkV3Config = e3db.ToznySDKJSONConfig{
-			ConfigFile: e3db.ConfigFile{
-				Version:     createdAccount.Account.Config.Version,
-				APIBaseURL:  createdAccount.Account.Config.APIURL,
-				APIKeyID:    createdAccount.Account.Config.APIKeyID,
-				APISecret:   createdAccount.Account.Config.APISecret,
-				ClientID:    createdAccount.Account.Config.ClientID,
-				ClientEmail: createdAccount.Account.Config.ClientEmail,
-				PublicKey:   createdAccount.Account.Config.PublicKey,
-				PrivateKey:  createdAccount.Account.Config.PrivateKey,
-			},
-			AccountPassword:   accountPassword,
-			AccountUsername:   strings.ToLower(accountUsername),
-			PublicSigningKey:  createdAccount.Account.Config.PublicSigningKey,
-			PrivateSigningKey: createdAccount.Account.Config.PrivateSigningKey,
-		}
-
-		accountID = createdAccount.Account.AccountID
 
 	} else {
 		if accountCredentialsFilepath != "" {
