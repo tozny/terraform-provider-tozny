@@ -76,13 +76,13 @@ func resourceRealmIdentity() *schema.Resource {
 			"first_name": {
 				Description: "The first name associated with this identity",
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
 			},
 			"last_name": {
 				Description: "The last name associated with this identity",
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
 			},
 			"recovery_email_ttl": {
